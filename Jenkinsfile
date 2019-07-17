@@ -15,17 +15,18 @@ node('docker && ubuntu-16.04') {
 	}
 	stage("download") {
 		sh '''#!/bin/sh
-			wget -c https://github.com/slapin/godot-templates-build/releases/download/2019_29_0717_0052/godot-templates.tar.gz
+			rm -f godot-templates.tar.gz
+			wget -c https://github.com/slapin/godot-templates-build/releases/download/2019_29_0717_2355/godot-templates.tar.gz
 			tar xf godot-templates.tar.gz
 			ls -l
 			ls -l godot-templates
-			./godot-templates/godot_server.x11.opt.tools.64  --help || true
+			./godot-templates/godot_server.x11.tools.64  --help || true
 			
 		'''
 	}
 	stage("export-linux") {
 		sh '''#!/bin/sh
-			./godot-templates/godot_server.x11.opt.tools.64 --path $(pwd)/proto1 --export "Linux X11" $(pwd)/proto1-linux
+			strace -e open ./godot-templates/godot_server.x11.tools.64 --path $(pwd)/proto1 --export "linux" $(pwd)/proto1-linux
 		'''
 	}
 }
