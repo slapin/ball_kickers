@@ -1,0 +1,22 @@
+[gd_scene format=2]
+
+[node name="dialogue" type="Node2D"]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="buttons" type="HBoxContainer" parent="CanvasLayer"]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = -80.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="actions" type="VBoxContainer" parent="CanvasLayer/buttons"]
+margin_right = 12.0
+margin_bottom = 80.0
+
+[node name="follow" type="Button" parent="CanvasLayer/buttons/actions"]
+margin_right = 12.0
+margin_bottom = 20.0

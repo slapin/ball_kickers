@@ -1,0 +1,64 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://characters/TEMPLATE_improved.png" type="Texture" id=1]
+[ext_resource path="res://npc.gd" type="Script" id=2]
+
+[sub_resource type="CapsuleShape2D" id=1]
+radius = 5.26428
+height = 8.6982
+
+[sub_resource type="CircleShape2D" id=2]
+
+[node name="npc_player" type="KinematicBody2D"]
+script = ExtResource( 2 )
+
+[node name="back_hair" type="Polygon2D" parent="."]
+color = Color( 0.313726, 0.054902, 0.054902, 1 )
+polygon = PoolVector2Array( -5.09197, -18.9822, -6.54988, -21.2501, -6.46888, -24.6518, -4.12004, -27.8916, -2.01417, -27.2437, 0.982628, -27.6486, 3.0075, -28.1346, 5.27535, -25.9478, 6.0853, -22.546, 4.87038, -19.2252, 3.57446, -18.6582, 1.30661, -18.7392, -0.394279, -17.9293, -2.17616, -18.8202, -3.79606, -18.4152 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Sprite" type="Sprite" parent="."]
+texture = ExtResource( 1 )
+offset = Vector2( 0, -16 )
+region_enabled = true
+region_rect = Rect2( 24, 64, 24, 32 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2( -0.250336, -9.01238 )
+shape = SubResource( 1 )
+
+[node name="suit" type="Polygon2D" parent="."]
+color = Color( 0.278431, 0.34902, 0.796078, 1 )
+polygon = PoolVector2Array( -8.00949, -11.8635, -4.89114, -16.7281, 4.6718, -16.8113, 8.33066, -11.9466, 5.17073, -9.65985, 4.08971, -11.9051, 3.89845, -8.04792, 4.4654, -1.32536, 0.496666, -1.00138, 0.334671, -6.99499, -0.556267, -1.00138, -3.55307, -1.40636, -3.47208, -8.20992, -4.14274, -11.6972, -5.30692, -9.49353 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="front_hair" type="Polygon2D" parent="."]
+color = Color( 0.313726, 0.054902, 0.054902, 1 )
+polygon = PoolVector2Array( -4.606, -24.6518, -5.17297, -22.546, -3.2291, -25.0568, -2.74313, -23.2749, -1.12323, -26.3527, 0.0916901, -23.2749, 1.06363, -25.9478, 1.30661, -23.4369, 2.03556, -23.9229, 2.44054, -26.2717, 3.33148, -23.0319, 3.97944, -22.708, 3.89845, -25.4618, 5.43734, -20.6021, 6.0853, -22.465, 4.78938, -26.9197, 1.63059, -28.4586, -0.0702972, -28.2966, -1.85218, -28.5396, -3.95805, -28.0536, -5.33496, -27.0817, -6.71187, -24.3279, -6.30689, -22.627 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="boot1" type="Polygon2D" parent="."]
+color = Color( 0.596078, 0.596078, 0.596078, 1 )
+polygon = PoolVector2Array( -3.87705, -1.97332, -1.28522, -1.16337, -1.44721, -0.110443, -4.606, -0.110443, -4.84899, -1.40636 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="boot2" type="Polygon2D" parent="."]
+color = Color( 0.596078, 0.596078, 0.596078, 1 )
+polygon = PoolVector2Array( 1.05451, -1.17793, 4.54707, -1.8016, 4.79653, -1.21951, 4.58864, -0.0553265, 1.17924, 0.0278301 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="capture" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="capture"]
+position = Vector2( 0.0831566, 1.62154 )
+shape = SubResource( 2 )
