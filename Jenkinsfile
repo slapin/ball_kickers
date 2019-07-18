@@ -92,12 +92,13 @@ node('docker && ubuntu-16.04') {
 				sh '''#!/bin/sh
 					export PATH=$PATH:$(pwd)/butler
 					set -e
-					butler status slapin/ball-kickers:linux
-					butler push BallKickers-linux.zip slapin/ball-kickers:linux
-					butler status slapin/ball-kickers:windows
-					butler push BallKickers-windows.zip slapin/ball-kickers:windows
 					butler push proto1-html5.zip slapin/ball-kickers:html
 					butler status slapin/ball-kickers:html
+					butler push BallKickers-windows.zip slapin/ball-kickers:windows
+					butler status slapin/ball-kickers:windows
+					butler status slapin/ball-kickers:linux
+					butler push BallKickers-linux.zip slapin/ball-kickers:linux
+					butler status slapin/ball-kickers:linux
 					
 				'''
 			}
