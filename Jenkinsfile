@@ -54,8 +54,24 @@ node('docker && ubuntu-16.04') {
 			ls -l
 			rm -Rf BallKickers
 			mkdir BallKickers
-			mv ${base}/proto1-linux BallKickers
-			zip -r BallKickers.zip BallKickers
+			mv ${base}/proto1-linux BallKickers/BallKickers
+			zip -r BallKickers-linux.zip BallKickers
+			rm -Rf BallKickers
+		'''
+	}
+	stage("export-windows") {
+		sh '''#!/bin/sh
+			set -e
+			base=$(pwd)
+			cd proto1
+			ls -l
+			${base}/godot-templates/godot_server.x11.tools.64 --export "windows" ${base}/proto1-windows.exe
+			cd ..
+			ls -l
+			rm -Rf BallKickers
+			mkdir BallKickers
+			mv ${base}/proto1-windows.exe BallKickers/proto1.exe
+			zip -r BallKickers-windows.zip BallKickers
 			rm -Rf BallKickers
 		'''
 	}
@@ -76,8 +92,12 @@ node('docker && ubuntu-16.04') {
 				sh '''#!/bin/sh
 					export PATH=$PATH:$(pwd)/butler
 					set -e
-					butler push BallKickers.zip slapin/ball-kickers:linux
-					butler push proto1-html5.zip slapin/ball-kickers:linux
+					butler status slapin/ball-kickers:linux
+					butler push BallKickers-linux.zip slapin/ball-kickers:linux
+					butler status slapin/ball-kickers:windows
+					butler push BallKickers-windows.zip slapin/ball-kickers:windows
+					butler push proto1-html5.zip slapin/ball-kickers:html
+					butler status slapin/ball-kickers:html
 					
 				'''
 			}
