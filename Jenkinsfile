@@ -79,9 +79,13 @@ node('docker && ubuntu-16.04') {
 		sh '''#!/bin/sh
 			set -e
 			base=$(pwd)
+			mkdir proto1-html
 			cd proto1
 			ls -l
-			${base}/godot-templates/godot_server.x11.tools.64 --export "HTML5" ${base}/proto1-html5.zip
+			${base}/godot-templates/godot_server.x11.tools.64 --export "HTML5" ${base}/proto1-html/index.html
+			cd ..
+			cd proto1-html
+			zip -r ${base}/proto1-html5.zip *
 			cd ..
 			ls -l
 		'''
@@ -94,6 +98,9 @@ node('docker && ubuntu-16.04') {
 					butler push proto1-html5.zip slapin/ball-kickers:html
 					H=$?
 					butler status slapin/ball-kickers:html
+					butler push proto1-html5.zip slapin/ball-kickers-html:html
+					H2=$?
+					butler status slapin/ball-kickers-html:html
 					butler push BallKickers-windows.zip slapin/ball-kickers:windows
 					W=$?
 					butler status slapin/ball-kickers:windows
@@ -101,7 +108,7 @@ node('docker && ubuntu-16.04') {
 					butler push BallKickers-linux.zip slapin/ball-kickers:linux
 					L=$?
 					butler status slapin/ball-kickers:linux
-					if [ $H != 0 -o $W != 0 -o $L != 0 ]; then
+					if [ $H != 0 -o $H2 != 0 -o $W != 0 -o $L != 0 ]; then
 						exit 1
 					fi
 				'''
