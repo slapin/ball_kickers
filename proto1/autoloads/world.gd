@@ -101,7 +101,7 @@ func increase_xp(ch, num):
 		print("next at ", ch.next_xp)
 
 func init_data():
-	for ci in range(12):
+	for ci in range(24):
 		var cd : = new_candidate()
 		line[ci] = cd
 	team = {}

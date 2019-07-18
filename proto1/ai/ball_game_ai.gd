@@ -79,10 +79,11 @@ func stop_game():
 		if _scores[k] > max_score:
 			max_score = _scores[k]
 			winner_team = k
-	for e in _teams[winner_team]:
-		world.increase_xp(e, min(e.xp * 2, min(100 * e.level, 1000)))
-	for e in _cheers[winner_team]:
-		world.increase_xp(e, min(e.xp * 2, min(200 * e.level, 2000)))
+	if winner_team >= 0:
+		for e in _teams[winner_team]:
+			world.increase_xp(e, min(e.xp * 2, min(100 * e.level, 1000)))
+		for e in _cheers[winner_team]:
+			world.increase_xp(e, min(e.xp * 2, min(200 * e.level, 2000)))
 
 var base_speed = 300.0
 func striker(ch: Dictionary, delta: float) -> Vector2:
@@ -257,9 +258,9 @@ func _process(delta):
 					_main.add_child(_ball_instance)
 					_ball_instance.global_position = world.master_node.global_position + Vector2(randf() - 0.5, randf() - 0.5) * 20.0
 					_ball_instance.add_to_group("ball")
-					catch_delay += 5.0
+					catch_delay += 10.0
 				else:
 					drop_ball(_ball_carrier)
-					catch_delay += 5.0
+					catch_delay += 7.0
 			if catch_delay > 0.0:
 				catch_delay -= delta

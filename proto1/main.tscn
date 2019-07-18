@@ -767,7 +767,7 @@ __meta__ = {
 position = Vector2( -98.8876, 5.10718 )
 
 [node name="cheer0" type="Position2D" parent="gym/game_points/team0"]
-position = Vector2( -166.926, -150.6 )
+position = Vector2( -148.35, -130.034 )
 
 [node name="cheer1" type="Position2D" parent="gym/game_points/team0"]
 position = Vector2( -164.864, -67.0573 )
@@ -800,7 +800,7 @@ __meta__ = {
 position = Vector2( 95.7458, 4.96942 )
 
 [node name="cheer0" type="Position2D" parent="gym/game_points/team1"]
-position = Vector2( 164.645, -153.658 )
+position = Vector2( 148.723, -129.111 )
 
 [node name="cheer1" type="Position2D" parent="gym/game_points/team1"]
 position = Vector2( 165.089, -68.4698 )
@@ -946,6 +946,7 @@ anchor_right = 1.0
 margin_right = 138.0
 margin_bottom = 33.0
 __meta__ = {
+"_edit_lock_": true,
 "_edit_use_anchors_": false
 }
 
@@ -1103,7 +1104,7 @@ __meta__ = {
 [node name="wall_fix6" type="StaticBody2D" parent="."]
 position = Vector2( 592.823, 97.3416 )
 collision_layer = 16
-collision_mask = 17
+collision_mask = 16
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="wall_fix6"]
 shape = SubResource( 47 )
@@ -1114,7 +1115,7 @@ __meta__ = {
 [node name="wall_fix7" type="StaticBody2D" parent="."]
 position = Vector2( 813.079, 413.793 )
 collision_layer = 16
-collision_mask = 17
+collision_mask = 16
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="wall_fix7"]
 shape = SubResource( 47 )
@@ -1125,7 +1126,7 @@ __meta__ = {
 [node name="wall_fix8" type="StaticBody2D" parent="."]
 position = Vector2( 593.487, 336.173 )
 collision_layer = 16
-collision_mask = 17
+collision_mask = 16
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="wall_fix8"]
 shape = SubResource( 47 )

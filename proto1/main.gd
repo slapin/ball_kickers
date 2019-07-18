@@ -75,6 +75,6 @@ func _ready():
 func _process(delta):
 	if world.training:
 		for k in ball_game._scores.keys():
-			if ball_game._scores[k] > 3.0:
+			if ball_game._scores[k] > 10.0:
 				start_training("gym", "action1")
 			
