@@ -27,7 +27,9 @@ node('docker && ubuntu-16.04') {
 			'''
 		}
 		sh '''#!/bin/sh
+			rm -f export-templates
 			tar xf godot-templates.tar.gz
+			ln -sf godot-templates export-templates
 			ls -l
 			ls -l godot-templates
 			./godot-templates/godot_server.x11.tools.64  --help || true
