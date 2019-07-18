@@ -30,6 +30,13 @@ node('docker && ubuntu-16.04') {
 			rm -f export-templates
 			tar xf godot-templates.tar.gz
 			ln -sf godot-templates export-templates
+                        mkdir butler
+                        cd butler
+                        curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
+                        unzip butler.zip
+                        chmod +x butler
+                        ./butler -V
+			cd ..
 			ls -l
 			ls -l godot-templates
 			./godot-templates/godot_server.x11.tools.64  --help || true
@@ -45,6 +52,11 @@ node('docker && ubuntu-16.04') {
 			${base}/godot-templates/godot_server.x11.tools.64 --export "linux" ${base}/proto1-linux
 			cd ..
 			ls -l
+			rm -Rf BallKickers
+			mkdir BallKickers
+			mv ${base}/proto1-linux BallKickers
+			zip -r BallKickers.zip BallKickers
+			rm -Rf BallKickers
 		'''
 	}
 	stage("export-html5") {
@@ -53,10 +65,23 @@ node('docker && ubuntu-16.04') {
 			base=$(pwd)
 			cd proto1
 			ls -l
-			${base}/godot-templates/godot_server.x11.tools.64 --export "HTML5" ${base}/proto1-html5
+			${base}/godot-templates/godot_server.x11.tools.64 --export "HTML5" ${base}/proto1-html5.zip
 			cd ..
 			ls -l
 		'''
+	}
+	stage("itch.io") {
+		withCredentials([string(credentialsId: 'itchio_token', variable: 'itchio_token')]) {
+			withEnv(["BUTLER_API_KEY=$itchio_token"]) {
+				sh '''#!/bin/sh
+					export PATH=$PATH:$(pwd)/butler
+					set -e
+					butler push BallKickers.zip slapin/ball-kickers:linux
+					butler push proto1-html5.zip slapin/ball-kickers:linux
+					
+				'''
+			}
+		}
 	}
 }
 
