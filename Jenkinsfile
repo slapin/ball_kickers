@@ -91,15 +91,19 @@ node('docker && ubuntu-16.04') {
 			withEnv(["BUTLER_API_KEY=$itchio_token"]) {
 				sh '''#!/bin/sh
 					export PATH=$PATH:$(pwd)/butler
-					set -e
 					butler push proto1-html5.zip slapin/ball-kickers:html
+					H=$?
 					butler status slapin/ball-kickers:html
 					butler push BallKickers-windows.zip slapin/ball-kickers:windows
+					W=$?
 					butler status slapin/ball-kickers:windows
 					butler status slapin/ball-kickers:linux
 					butler push BallKickers-linux.zip slapin/ball-kickers:linux
+					L=$?
 					butler status slapin/ball-kickers:linux
-					
+					if [ $H != 0 -o $W != 0 -o $L != 0 ]; then
+						exit 1
+					fi
 				'''
 			}
 		}
