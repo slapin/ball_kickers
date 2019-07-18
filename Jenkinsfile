@@ -1,3 +1,9 @@
+properties([
+  parameters([
+    booleanParam(defaultValue: true, description: 'Redownlad large file', name: 'DOWNLOAD_TEMPLATES')
+   ])
+])
+
 def git_clone(url, branch, dirname)
 { 
         checkout([$class: 'GitSCM',
@@ -14,9 +20,13 @@ node('docker && ubuntu-16.04') {
 		checkout scm
 	}
 	stage("download") {
+		if (params.DOWNLOAD_TEMPLATES) {
+			sh '''#!/bin/sh
+				rm -f godot-templates.tar.gz
+				wget -c https://github.com/slapin/godot-templates-build/releases/download/2019_29_0717_2355/godot-templates.tar.gz
+			'''
+		}
 		sh '''#!/bin/sh
-			rm -f godot-templates.tar.gz
-			wget -c https://github.com/slapin/godot-templates-build/releases/download/2019_29_0717_2355/godot-templates.tar.gz
 			tar xf godot-templates.tar.gz
 			ls -l
 			ls -l godot-templates
@@ -30,3 +40,4 @@ node('docker && ubuntu-16.04') {
 		'''
 	}
 }
+
