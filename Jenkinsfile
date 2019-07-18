@@ -42,7 +42,7 @@ node('docker && ubuntu-16.04') {
 			base=$(pwd)
 			cd proto1
 			ls -l
-			${base}/godot-templates/godot_server.x11.tools.64 --export "linux" proto1-linux
+			${base}/godot-templates/godot_server.x11.tools.64 --export "linux" ${base}/proto1-linux
 			cd ..
 			ls -l
 		'''
@@ -53,7 +53,7 @@ node('docker && ubuntu-16.04') {
 			base=$(pwd)
 			cd proto1
 			ls -l
-			${base}/godot-templates/godot_server.x11.tools.64 --export "HTML5" proto1-html5
+			${base}/godot-templates/godot_server.x11.tools.64 --export "HTML5" ${base}/proto1-html5
 			cd ..
 			ls -l
 		'''
