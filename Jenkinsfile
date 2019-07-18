@@ -36,6 +36,7 @@ node('docker && ubuntu-16.04') {
 	}
 	stage("export-linux") {
 		sh '''#!/bin/sh
+			set -e
 			base=$(pwd)
 			cd proto1
 			${base}/godot-templates/godot_server.x11.tools.64 --export "linux" ${base}/proto1-linux
@@ -45,6 +46,7 @@ node('docker && ubuntu-16.04') {
 	}
 	stage("export-html5") {
 		sh '''#!/bin/sh
+			set -e
 			base=$(pwd)
 			cd proto1
 			${base}/godot-templates/godot_server.x11.tools.64 --export "HTML5" ${base}/proto1-html5
