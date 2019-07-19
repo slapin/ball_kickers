@@ -82,7 +82,13 @@ node('docker && ubuntu-16.04') {
 			mkdir proto1-html
 			cd proto1
 			ls -l
+			cp project.godot project.godot.backup
+			sed -e 's/GLES3/GLES2/g' -f -i project.godot
+			cat project.godot
 			${base}/godot-templates/godot_server.x11.tools.64 --export "HTML5" ${base}/proto1-html/index.html
+			cp project.godot.backup project.godot
+			rm -f project.godot.backup
+
 			cd ..
 			cd proto1-html
 			zip -r ${base}/proto1-html5.zip *
