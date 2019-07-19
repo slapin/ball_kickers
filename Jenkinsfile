@@ -79,6 +79,7 @@ node('docker && ubuntu-16.04') {
 		sh '''#!/bin/sh
 			set -e
 			base=$(pwd)
+			rm -Rf proto1-html
 			mkdir proto1-html
 			cd proto1
 			ls -l
