@@ -47,14 +47,14 @@ node('docker && ubuntu-16.04') {
 		sh '''#!/bin/sh
 			set -e
 			base=$(pwd)
-			cd proto1
+			cd proto2
 			ls -l
-			${base}/godot-templates/godot_server.x11.tools.64 --export "linux" ${base}/proto1-linux
+			${base}/godot-templates/godot_server.x11.tools.64 --export "linux" ${base}/proto2-linux
 			cd ..
 			ls -l
 			rm -Rf BallKickers
 			mkdir BallKickers
-			mv ${base}/proto1-linux BallKickers/BallKickers
+			mv ${base}/proto2-linux BallKickers/BallKickers
 			zip -r BallKickers-linux.zip BallKickers
 			rm -Rf BallKickers
 		'''
@@ -63,14 +63,14 @@ node('docker && ubuntu-16.04') {
 		sh '''#!/bin/sh
 			set -e
 			base=$(pwd)
-			cd proto1
+			cd proto2
 			ls -l
-			${base}/godot-templates/godot_server.x11.tools.64 --export "windows" ${base}/proto1-windows.exe
+			${base}/godot-templates/godot_server.x11.tools.64 --export "windows" ${base}/proto2-windows.exe
 			cd ..
 			ls -l
 			rm -Rf BallKickers
 			mkdir BallKickers
-			mv ${base}/proto1-windows.exe BallKickers/proto1.exe
+			mv ${base}/proto2-windows.exe BallKickers/proto2.exe
 			zip -r BallKickers-windows.zip BallKickers
 			rm -Rf BallKickers
 		'''
@@ -79,20 +79,20 @@ node('docker && ubuntu-16.04') {
 		sh '''#!/bin/sh
 			set -e
 			base=$(pwd)
-			rm -Rf proto1-html
-			mkdir proto1-html
-			cd proto1
+			rm -Rf proto2-html
+			mkdir proto2-html
+			cd proto2
 			ls -l
 			cp project.godot project.godot.backup
 			sed -e 's/GLES3/GLES2/g' -i project.godot
 			cat project.godot
-			${base}/godot-templates/godot_server.x11.tools.64 --export "HTML5" ${base}/proto1-html/index.html
+			${base}/godot-templates/godot_server.x11.tools.64 --export "HTML5" ${base}/proto2-html/index.html
 			cp project.godot.backup project.godot
 			rm -f project.godot.backup
 
 			cd ..
-			cd proto1-html
-			zip -r ${base}/proto1-html5.zip *
+			cd proto2-html
+			zip -r ${base}/proto2-html5.zip *
 			cd ..
 			ls -l
 		'''
@@ -102,10 +102,10 @@ node('docker && ubuntu-16.04') {
 			withEnv(["BUTLER_API_KEY=$itchio_token"]) {
 				sh '''#!/bin/sh
 					export PATH=$PATH:$(pwd)/butler
-					butler push proto1-html5.zip slapin/ball-kickers:html
+					butler push proto2-html5.zip slapin/ball-kickers:html
 					H=$?
 					butler status slapin/ball-kickers:html
-					butler push proto1-html5.zip slapin/ball-kickers-html:html
+					butler push proto2-html5.zip slapin/ball-kickers-html:html
 					H2=$?
 					butler status slapin/ball-kickers-html:html
 					butler push BallKickers-windows.zip slapin/ball-kickers:windows
