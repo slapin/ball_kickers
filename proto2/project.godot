@@ -26,6 +26,7 @@ run/main_scene="res://ui/menu_root.tscn"
 
 world="*res://autoloads/world.gd"
 controls="*res://autoloads/controls.gd"
+characters="*res://autoloads/characters.gd"
 
 [input]
 

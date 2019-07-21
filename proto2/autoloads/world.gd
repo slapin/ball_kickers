@@ -12,6 +12,7 @@ var cheer_team = {}
 var room_events = {}
 var line = {}
 var training = false
+var nav: Navigation
 
 func room_event(ev: String):
 	if current_room:
