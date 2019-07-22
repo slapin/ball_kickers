@@ -11,6 +11,11 @@ const GRAVITY = Vector3(0, -9.8, 0)
 func _ready():
 	orientation = Transform()
 	skel = get_children()[0]
+	add_to_group("characters")
+	add_to_group("activatable")
+
+func get_act():
+	return "Talk"
 
 func idle():
 	var sm: AnimationNodeStateMachinePlayback = $AnimationTree["parameters/base/playback"]
