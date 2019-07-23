@@ -1,0 +1,58 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://ui/start_quest_notification.gd" type="Script" id=1]
+
+[node name="start_quest_notification" type="Control"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -90.0
+margin_top = -40.0
+margin_right = 90.0
+margin_bottom = 40.0
+rect_min_size = Vector2( 180, 80 )
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="v" type="VBoxContainer" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -93.0
+margin_top = -34.0
+margin_right = 93.0
+margin_bottom = 34.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="msg" type="Label" parent="v"]
+margin_right = 186.0
+margin_bottom = 14.0
+text = "Starting quest:"
+align = 1
+
+[node name="quest_title" type="Label" parent="v"]
+margin_top = 18.0
+margin_right = 186.0
+margin_bottom = 32.0
+text = "quest title"
+align = 1
+
+[node name="quest_desc" type="Label" parent="v"]
+margin_top = 36.0
+margin_right = 186.0
+margin_bottom = 50.0
+text = "quest description"
+align = 3
+
+[node name="msg2" type="Label" parent="v"]
+margin_top = 54.0
+margin_right = 186.0
+margin_bottom = 68.0
+text = "Quest added to your journal"
+align = 1

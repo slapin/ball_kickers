@@ -13,6 +13,7 @@ var room_events = {}
 var line = {}
 var training = false
 var nav: Navigation
+var quests : = []
 
 func room_event(ev: String):
 	if current_room:
@@ -28,6 +29,23 @@ func register_room_event(roomobj, evname, fname):
 func _ready():
 	connect("room_event", self, "room_event")
 
+var master_stats:Dictionary = {
+	"type": 0,
+	"gender": 0,
+	"name": "John",
+	"lastname": "Smith",
+	"speed": 0.5,
+	"strength": 0.5,
+	"agression": 0.5,
+	"charisma": 0.5,
+	"obedience": 0.0,
+	"cost": 0,
+	"xp": 0,
+	"mext_xp": 100,
+	"points": 5,
+	"level": 1
+}
+
 func new_candidate() -> Dictionary:
 	var gender = randi() % 2
 	var type = 0
@@ -42,6 +60,7 @@ func new_candidate() -> Dictionary:
 	else:
 		ret.name = "Jane"
 		ret.lastname = "Doe"
+	ret.gender = gender
 	ret.type = type
 	ret.speed = 0.3 + randf() * 0.7
 	ret.strength = 0.1 + randf() * 0.9
@@ -108,6 +127,7 @@ func init_data():
 	team = {}
 	cheer_team = {}
 	print(line)
+	
 
 func dialogue(npc):
 	pass
