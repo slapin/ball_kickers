@@ -2,6 +2,8 @@ extends KinematicBody
 var orientation: Transform
 var velocity: Vector3 = Vector3()
 var skel: Skeleton
+var anim_tree: AnimationTree
+var aplay: AnimationPlayer
 const GRAVITY = Vector3(0, -9.8, 0)
 # Declare member variables here. Examples:
 # var a = 2
@@ -10,7 +12,25 @@ const GRAVITY = Vector3(0, -9.8, 0)
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	orientation = Transform()
-	skel = get_children()[0]
+	skel = get_children()[0].get_children()[0]
+	var queue = [self]
+	while queue.size() > 0:
+		var item = queue[0]
+		queue.pop_front()
+		if item is Skeleton:
+			skel = item
+		if item is AnimationTree:
+			anim_tree = item
+		if item is AnimationPlayer:
+			aplay = item
+		if skel != null && anim_tree != null && aplay != null:
+			break
+		for c in item.get_children():
+			queue.push_back(c)
+	for v in aplay.get_animation_list():
+		if v.ends_with("loop"):
+			var anim = aplay.get_animation(v)
+			anim.loop = true
 	add_to_group("characters")
 	add_to_group("activatable")
 
@@ -18,15 +38,15 @@ func get_act():
 	return "Talk"
 
 func idle():
-	var sm: AnimationNodeStateMachinePlayback = $AnimationTree["parameters/base/playback"]
+	var sm: AnimationNodeStateMachinePlayback = anim_tree["parameters/base/playback"]
 	sm.travel("Idle")
 func walk():
-	var sm: AnimationNodeStateMachinePlayback = $AnimationTree["parameters/base/playback"]
+	var sm: AnimationNodeStateMachinePlayback = anim_tree["parameters/base/playback"]
 	sm.travel("Walk")
 func set_walk_speed(spd: float):
-	$AnimationTree["parameters/base/Walk/speed/scale"] = spd
+	anim_tree["parameters/base/Walk/speed/scale"] = spd
 func get_walk_speed() -> float:
-	return $AnimationTree["parameters/base/Walk/speed/scale"]
+	return anim_tree["parameters/base/Walk/speed/scale"]
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):
@@ -44,8 +64,8 @@ func walkto(target: Vector3, spd: float = 1.4):
 func _process(delta):
 	orientation = global_transform
 	orientation.origin = Vector3()
-	var sm: AnimationNodeStateMachinePlayback = $AnimationTree["parameters/base/playback"]
-	var rm = $AnimationTree.get_root_motion_transform()
+	var sm: AnimationNodeStateMachinePlayback = anim_tree["parameters/base/playback"]
+	var rm = anim_tree.get_root_motion_transform()
 	orientation *= rm
 	var h_velocity = orientation.origin / delta
 	velocity.x = h_velocity.x

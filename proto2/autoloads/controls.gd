@@ -50,7 +50,6 @@ func _process(delta):
 			mon_labels[act_obj].text = act_obj.get_act()
 			add_child(mon_labels[act_obj])
 			mon_labels[act_obj].rect_position = camera.unproject_position(act_obj.global_transform.origin)
-			print("act3:", mon_labels[act_obj].text)
 	for k in  monitored_objects:
 		var epos = k.global_transform.origin
 		var new_dist = opos.distance_squared_to(epos)
@@ -58,7 +57,6 @@ func _process(delta):
 			monitored_objects.erase(k)
 			mon_labels[k].queue_free()
 			mon_labels.erase(k)
-			print("removed label")
 			break
 		else:
 			mon_labels[k].rect_position = camera.unproject_position(k.global_transform.origin)
