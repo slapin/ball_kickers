@@ -23,11 +23,23 @@ _global_script_classes=[ {
 "class": "QuestObjective",
 "language": "GDScript",
 "path": "res://system/quest_objective.gd"
+}, {
+"base": "Quest",
+"class": "StatsQuest",
+"language": "GDScript",
+"path": "res://system/stats_quest.gd"
+}, {
+"base": "Quest",
+"class": "WalkQuest",
+"language": "GDScript",
+"path": "res://system/walk_quest.gd"
 } ]
 _global_script_class_icons={
 "BallGameAI": "",
 "Quest": "",
-"QuestObjective": ""
+"QuestObjective": "",
+"StatsQuest": "",
+"WalkQuest": ""
 }
 
 [application]

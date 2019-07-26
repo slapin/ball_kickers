@@ -9,6 +9,7 @@ var _title: String
 var _description: String
 var _active: bool = false
 var _complete: bool = false
+var _next_quest: Quest
 func _init(title: String, description: String):
 	_title = title
 	_description = description
@@ -21,10 +22,10 @@ func is_active():
 func update():
 	if !_active:
 		return
-	var m = get_meta("quest")
-	if m != null:
-		for k in _objectives:
-			k.set_meta("quest", m)
+#	var m = get_meta("quest")
+#	if m != null:
+#		for k in _objectives:
+#			k.set_meta("quest", m)
 	for k in _objectives:
 		k.update()
 	for k in _children:
@@ -35,19 +36,32 @@ func update():
 			_complete = false
 			break
 	if !_complete:
+		print("quest: ", _title, " objectives incomplete")
 		return
 	for k in _children:
 		if !k.is_complete():
 			_complete = false
 			break
+	if !_complete:
+		print("quest: ", _title, " children incomplete")
 	if _complete:
 		emit_signal("complete", self)
 		_active = false
+		quest_complete()
+func quest_complete_handler(quest: Quest):
+	var next = quest.get_next_quest()
+	if next != null:
+		add_child(next)
+		next.connect("complete", self, "quest_complete_handler")
+		next.start()
 func start():
 	_active = true
 	for k in _children:
+		k.connect("complete", self, "quest_complete_handler")
 		k.start()
 	emit_signal("started", self)
+	print("children: ", _children)
+	print("quest: ", _title, " started")
 func get_cur_task_text():
 	var ret: String = "No current task"
 	if _active:
@@ -64,3 +78,15 @@ func get_title():
 	return _title
 func get_description():
 	return _description
+func quest_complete():
+	print("quest: ", _title, " complete")
+func add_objective(obj: QuestObjective):
+	if !obj in _objectives:
+		_objectives.push_back(obj)
+func remove_objective(obj: QuestObjective):
+	if obj in _objectives:
+		_objectives.erase(obj)
+func set_next_quest(obj: Quest):
+	_next_quest = obj
+func get_next_quest() -> Quest:
+	return _next_quest

@@ -21,6 +21,10 @@ func update_quests():
 func start_quest(quest: Quest):
 	$start_quest_notification.start_notification(quest.get_title(), quest.get_description())
 
+func start_interaction(obj):
+	print("started interaction")
+	$interaction.start_interaction(obj)
+
 func _ready():
 	$master.add_to_group("master")
 	controls.master_node = $master
@@ -31,13 +35,14 @@ func _ready():
 	controls.connect("user_click", self, "master_control")
 	for k in world.line.keys():
 		var cd = world.line[k]
-		if cd.type == 0:
+		if cd.gender == 0:
 			var char_sc = characters.characters[0].instance()
 			cd.scene = char_sc
 			get_tree().get_root().add_child(char_sc)
 			var nav: Navigation2D = get_node("nav")
 			var p = nav.get_closest_point(get_node("line_spawn").global_transform.origin + Vector3(randf() * 20.0 - 10.0, 0.0, randf() * 20 - 10.0))
 			char_sc.translation = p
+			cd.id = k
 			char_sc.set_meta("data", cd)
 #			world.team[newkey] = cd
 #			world.line.erase(k)
@@ -48,12 +53,21 @@ func _ready():
 			var nav: Navigation2D = get_node("nav")
 			var p = nav.get_closest_point(get_node("line_spawn").global_transform.origin + Vector3(randf() * 20.0 - 10.0, 0.0, randf() * 20 - 10.0))
 			char_sc.translation = p
+			cd.id = k
 			char_sc.set_meta("data", cd)
 #			world.team[newkey] = cd
 #		cd.scene.set_meta("data", cd)
 	var tut_quest = Quest.new("Tutorial", "This quest shortly introduces to a game")
 	tut_quest.connect("started", self, "start_quest")
 	world.quests.push_back(tut_quest)
+	var tut1_quest = WalkQuest.new("Walk to closet room", "Walk to closet room designated location", get_node("quest_dst_closet"))
+	var tut2_quest = StatsQuest.new("Hire team members", "Hire new team members to start with your team", {"player_count": 6})
+	var tut3_quest = WalkQuest.new("Walk to gym", "Walk to gym designated location", get_node("quest_dst_gym"))
+	var tut4_quest = StatsQuest.new("Train your team", "Complete your team training once", {"team_train_count": 1})
+	tut1_quest.set_next_quest(tut2_quest)
+	tut2_quest.set_next_quest(tut3_quest)
+	tut3_quest.set_next_quest(tut4_quest)
+	tut_quest.add_child(tut1_quest)
 	tut_quest.start()
 	update_quests()
 	var quest_timer : = Timer.new()
@@ -61,10 +75,8 @@ func _ready():
 	add_child(quest_timer)
 	quest_timer.connect("timeout", self, "update_quests")
 	quest_timer.start()
-	
-	
+	controls.connect("action1", self, "start_interaction")
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	var pos = $master.global_transform.origin
 	pos.y = $Camera.global_transform.origin.y
