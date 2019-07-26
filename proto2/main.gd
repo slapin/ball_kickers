@@ -23,7 +23,10 @@ func start_quest(quest: Quest):
 
 func start_interaction(obj):
 	print("started interaction")
-	$interaction.start_interaction(obj)
+	if obj.is_in_group("characters"):
+		$interaction.start_interaction(obj)
+	else:
+		obj.activate()
 
 func _ready():
 	$master.add_to_group("master")

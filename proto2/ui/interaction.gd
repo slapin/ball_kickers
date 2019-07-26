@@ -31,6 +31,22 @@ func hire_as_team():
 		npc_data.type = 0
 	hide()
 func hire_as_cheer_team():
+	var npc_data: Dictionary = active_npc.get_meta("data")
+	var newkey = 0
+	var teamkeys = world.cheer_team.keys()
+	if teamkeys.size() > 0:
+		var maxkey = teamkeys.max()
+		newkey = maxkey + 1
+	if npc_data.gender == 1:
+		var dst_node = get_node("/root/main/quest_dst_female_dorm")
+		var dst = dst_node.global_transform.origin
+		active_npc.walkto(dst)
+		world.cheer_team[newkey] = npc_data
+		print("line: ", world.line.size())
+		world.line.erase(npc_data.id)
+		npc_data.erase("id")
+		print("line2: ", world.line.size())
+		npc_data.type = 0
 	hide()
 func _ready():
 	hide()
@@ -39,6 +55,11 @@ func _ready():
 func start_interaction(npc):
 	active_npc = npc
 	show()
+	var npc_data: Dictionary = active_npc.get_meta("data")
+	if npc_data.gender == 0:
+		$h/hire_cheer_team.hide()
+	else:
+		$h/hire_cheer_team.show()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):
