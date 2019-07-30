@@ -27,7 +27,9 @@ func _process(delta):
 		var tf_turn = Transform(Quat(Vector3(0, 1, 0), PI * 0.6 * delta))
 		frame_tf *= tf_turn
 	if Input.is_action_just_pressed("action1"):
-		if monitored_objects.size() > 0:
+		if master_node.item_right_hand:
+			master_node.item_right_hand.activate()
+		elif monitored_objects.size() > 0:
 			var closest = monitored_objects[0]
 			var dst = master_node.global_transform.origin.distance_to(closest.global_transform.origin)
 			for k in monitored_objects:

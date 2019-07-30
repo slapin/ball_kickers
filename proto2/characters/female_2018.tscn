@@ -78,6 +78,16 @@ script = ExtResource( 1 )
 
 [node name="female_2018" parent="." instance=ExtResource( 2 )]
 
+[node name="female_2018" parent="female_2018" index="0"]
+bones/132/bound_children = [ NodePath("item_carry") ]
+
+[node name="item_carry" type="BoneAttachment" parent="female_2018/female_2018" index="13"]
+transform = Transform( 0.816538, -0.555132, -0.158408, 0.505615, 0.555284, 0.660309, -0.278598, -0.619263, 0.734095, 0.174373, 0.783361, -0.0350451 )
+bone_name = "wrist_R"
+
+[node name="ball_carry" type="Spatial" parent="female_2018/female_2018/item_carry"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12, 0, 0 )
+
 [node name="AnimationTree" type="AnimationTree" parent="female_2018"]
 tree_root = SubResource( 14 )
 anim_player = NodePath("../female_2018/AnimationPlayer")

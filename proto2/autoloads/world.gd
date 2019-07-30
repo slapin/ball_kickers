@@ -3,6 +3,7 @@ signal room_event
 signal next_day
 signal next_period
 signal level_up
+signal start_training
 
 var money: int = 2000
 var master_node

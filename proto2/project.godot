@@ -14,6 +14,16 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://ai/ball_game_ai.gd"
 }, {
+"base": "Node",
+"class": "BallGameAI3D",
+"language": "GDScript",
+"path": "res://ai/ball_game_ai3d.gd"
+}, {
+"base": "RigidBody",
+"class": "Item",
+"language": "GDScript",
+"path": "res://items/item.gd"
+}, {
 "base": "Reference",
 "class": "Quest",
 "language": "GDScript",
@@ -36,6 +46,8 @@ _global_script_classes=[ {
 } ]
 _global_script_class_icons={
 "BallGameAI": "",
+"BallGameAI3D": "",
+"Item": "",
 "Quest": "",
 "QuestObjective": "",
 "StatsQuest": "",

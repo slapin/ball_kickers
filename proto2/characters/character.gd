@@ -5,6 +5,8 @@ var skel: Skeleton
 var anim_tree: AnimationTree
 var aplay: AnimationPlayer
 const GRAVITY = Vector3(0, -9.8, 0)
+var ball_carry: Node
+var item_right_hand: Node
 # Declare member variables here. Examples:
 # var a = 2
 # var b = "text"
@@ -33,6 +35,7 @@ func _ready():
 			anim.loop = true
 	add_to_group("characters")
 	add_to_group("activatable")
+	ball_carry = get_children()[0].get_children()[0].get_node("item_carry/ball_carry")
 
 func get_act():
 	return "Talk"
@@ -61,7 +64,12 @@ func walkto(target: Vector3, spd: float = 1.4):
 	set_walk_speed(spd)
 	walk()
 
-func _process(delta):
+func take_object(obj):
+	if obj.is_in_group("items"):
+		obj.taken(self)
+		
+
+func _physics_process(delta):
 	orientation = global_transform
 	orientation.origin = Vector3()
 	var sm: AnimationNodeStateMachinePlayback = anim_tree["parameters/base/playback"]
@@ -84,7 +92,7 @@ func _process(delta):
 			var direction: Vector3 = (next - global_transform.origin).normalized()
 			var actual_direction: Vector3 = -global_transform.basis[2]
 			var angle: float = Vector2(actual_direction.x, actual_direction.z).angle_to(Vector2(direction.x, direction.z))
-			var tf_turn = Transform(Quat(Vector3(0, 1, 0), -angle * delta))
+			var tf_turn = Transform(Quat(Vector3(0, 1, 0), -angle * min(delta * 2.0, 1.0)))
 			orientation *= tf_turn
 		if !_path || _path.size() == 0:
 			idle()

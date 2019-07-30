@@ -6,8 +6,11 @@ extends Spatial
 
 # Called when the node enters the scene tree for the first time.
 var frame_tf: Transform = Transform()
+var ball_game : BallGameAI3D
 
 func master_control(pos):
+	var n = lerp(world.master_node.get_walk_speed(), 3.8, 0.1)
+	world.master_node.set_walk_speed(n)
 	$master.walkto(pos)
 
 func update_quests():
@@ -27,6 +30,35 @@ func start_interaction(obj):
 		$interaction.start_interaction(obj)
 	else:
 		obj.activate()
+
+func start_training(ball):
+	print("start training")
+	ball_game = BallGameAI3D.new()
+	var t0 = $team0
+	var t1 = $team1
+	for k in t0.get_children():
+		if k.name.begins_with("cheer"):
+			ball_game.add_cheer_game_location(0, k.global_transform.origin)
+		elif k.name == "start":
+			ball_game.set_team_start(0, k.global_transform.origin)
+		elif k.name == "gate":
+			ball_game.set_team_gate(0, k)
+	for k in t1.get_children():
+		if k.name.begins_with("cheer"):
+			ball_game.add_cheer_game_location(1, k.global_transform.origin)
+		elif k.name == "start":
+			ball_game.set_team_start(1, k.global_transform.origin)
+		elif k.name == "gate":
+			ball_game.set_team_gate(1, k)
+	for ch in world.cheer_team.keys():
+		assert world.cheer_team[ch] != null
+		ball_game.add_cheer(randi() % 2, world.cheer_team[ch])
+	for ch in world.team.keys():
+		assert world.team[ch] != null
+		ball_game.add_player(randi() % 2, world.team[ch])
+	ball_game.set_ball(ball)
+	ball_game.set_main(self)
+	ball_game.start_game()
 
 func _ready():
 	$master.add_to_group("master")
@@ -79,6 +111,7 @@ func _ready():
 	quest_timer.connect("timeout", self, "update_quests")
 	quest_timer.start()
 	controls.connect("action1", self, "start_interaction")
+	world.connect("start_training", self, "start_training")
 
 func _process(delta):
 	var pos = $master.global_transform.origin

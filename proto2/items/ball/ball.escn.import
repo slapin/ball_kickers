@@ -2,12 +2,12 @@
 
 importer="scene"
 type="PackedScene"
-path="res://.import/ball.escn-c244a295d2ddfac47ce2708f1bcb6791.scn"
+path="res://.import/ball.escn-8722f09c6da73e6847feb641eaa35784.scn"
 
 [deps]
 
-source_file="res://ball/ball.escn"
-dest_files=[ "res://.import/ball.escn-c244a295d2ddfac47ce2708f1bcb6791.scn" ]
+source_file="res://items/ball/ball.escn"
+dest_files=[ "res://.import/ball.escn-8722f09c6da73e6847feb641eaa35784.scn" ]
 
 [params]
 
