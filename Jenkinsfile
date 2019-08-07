@@ -23,7 +23,7 @@ node('docker && ubuntu-16.04') {
 		if (params.DOWNLOAD_TEMPLATES) {
 			sh '''#!/bin/sh
 				rm -f godot-templates.tar.gz
-				wget -c https://github.com/slapin/godot-templates-build/releases/download/2019_29_0717_2355/godot-templates.tar.gz
+				wget -c https://github.com/slapin/godot-templates-build/releases/download/2019_31_0802_1959/godot-templates.tar.gz
 			'''
 		}
 		sh '''#!/bin/sh
