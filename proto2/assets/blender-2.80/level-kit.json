@@ -1,0 +1,5 @@
+{
+	"collections": ["outside-walls", "inside-walls", "inside-doors"],
+	"object_types": ["EMPTY", "ARMATURE", "GEOMETRY"],
+	"outpath": "walls"
+}

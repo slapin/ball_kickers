@@ -7,6 +7,7 @@ var master_node: Node
 var camera: Camera
 var monitored_objects = []
 var mon_labels = {}
+var talk_icon = preload("res://ui/act_talk.tscn")
 func _ready():
 	pass
 func _process(delta):
@@ -59,8 +60,12 @@ func _process(delta):
 		if act_dist < 4.0 && monitored_objects.size() < 4:
 			print("act2: ", act_obj, " ", act_dist)
 			monitored_objects.push_back(act_obj)
-			mon_labels[act_obj] = Label.new()
-			mon_labels[act_obj].text = act_obj.get_act()
+			if act_obj.is_in_group("characters"):
+				mon_labels[act_obj] = talk_icon.instance()
+			else:
+				mon_labels[act_obj] = Button.new()
+				mon_labels[act_obj].text = act_obj.get_act()
+			mon_labels[act_obj].connect("pressed", self, "emit_signal", ["action1", act_obj])
 			add_child(mon_labels[act_obj])
 			mon_labels[act_obj].rect_position = camera.unproject_position(act_obj.global_transform.origin)
 	for k in  monitored_objects:
@@ -85,15 +90,19 @@ func _unhandled_input(event):
 		if event.button_mask & BUTTON_MASK_LEFT:
 			click2d = event.position
 			click2d_update = true
+			print("click!")
 func _physics_process(delta):
 	if click2d_update:
+		print("click! 2")
 		var space := camera.get_world().direct_space_state
 		var ray_origin : = camera.project_ray_origin(click2d)
 		var ray_normal : = camera.project_ray_normal(click2d)
 		var result := space.intersect_ray(ray_origin, ray_origin + ray_normal * 120.0, [], 512, true, false)
+		print(result)
 		if result.has("position"):
 			click3d = result.position
 			click3d_update = true
+			print("click! 3")
 			emit_signal("user_click", click3d)
 		click2d_update = false
 		

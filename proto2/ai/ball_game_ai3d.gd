@@ -46,6 +46,8 @@ func add_cheer_game_location(team: int, loc: Vector3):
 func set_team_start(team: int, v: Vector3):
 	_team_start[team] = v
 	_game_area = _game_area.expand(v)
+func check_goal(gate):
+	pass
 func set_team_gate(team: int, gate: Area):
 	_gates[team] = gate
 	gate2team[gate] = team
@@ -54,6 +56,7 @@ func set_team_gate(team: int, gate: Area):
 	_game_area = _game_area.expand(o)
 func set_main(n):
 	_main = n
+var start_timeout = 10.0
 func start_game():
 	var ball = _ball_instance
 	ball.add_to_group("ball")
@@ -64,7 +67,8 @@ func start_game():
 			print(ch)
 			assert ch.scene != null
 			print("start: ", _team_start[t])
-			ch.scene.walkto(_team_start[t])
+			ch.scene.walkto(_team_start[t] + Vector3(randf() * 2.0 - 1.0, 0.0, randf() * 2.0 - 1.0))
+			start_timeout = 10.0
 	var loc = 0
 	for t in _cheers.keys():
 		for ch in _cheers[t]:
@@ -90,3 +94,26 @@ func stop_game():
 			world.increase_xp(e, min(e.xp * 2, min(100 * e.level, 1000)))
 		for e in _cheers[winner_team]:
 			world.increase_xp(e, min(e.xp * 2, min(200 * e.level, 2000)))
+func _physics_process(delta):
+	match(_state):
+		STATE_START:
+			start_timeout -= delta
+#			print("timeout")
+			if start_timeout <= 0.0:
+				for t in _teams.keys():
+					for ch in _teams[t]:
+#						print("teleport")
+						ch.scene.global_transform.origin = ch.scene._path[ch.scene._path.size() - 1]
+				_state = STATE_RUNNING
+		STATE_RUNNING:
+#			print("running")
+			var tgt = _ball_instance.global_transform.origin
+			for t in _teams.keys():
+				for ch in _teams[t]:
+					if ch.scene._path && ch.scene._path.size() > 0:
+						var moveto = ch.scene._path[ch.scene._path.size() - 1]
+						if tgt.distance_squared_to(moveto) > 0.5:
+#							print("walking")
+							ch.scene.walkto(tgt)
+					else:
+							ch.scene.walkto(tgt)

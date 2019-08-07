@@ -1,0 +1,5 @@
+{
+	"collections": ["level"],
+	"object_types": ["EMPTY", "ARMATURE", "GEOMETRY"],
+	"outpath": "walls"
+}

@@ -9,6 +9,7 @@ var frame_tf: Transform = Transform()
 var ball_game : BallGameAI3D
 
 func master_control(pos):
+	print("walkto: ", pos)
 	var n = lerp(world.master_node.get_walk_speed(), 3.8, 0.1)
 	world.master_node.set_walk_speed(n)
 	$master.walkto(pos)
@@ -59,8 +60,19 @@ func start_training(ball):
 	ball_game.set_ball(ball)
 	ball_game.set_main(self)
 	ball_game.start_game()
+	add_child(ball_game)
 
 func _ready():
+	var tstart = $nav/navmesh/level_level
+	var queue = [tstart]
+	while queue.size() > 0:
+		var item = queue[0]
+		queue.pop_front()
+		if item is StaticBody:
+			item.collision_layer = 512
+			item.collision_mask = 1 | 512
+		for c in item.get_children():
+			queue.push_back(c)
 	$master.add_to_group("master")
 	controls.master_node = $master
 	world.master_node = $master
