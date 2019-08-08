@@ -39,6 +39,11 @@ func _process(delta):
 					dst = ndst
 					closest = k
 			emit_signal("action1", closest)
+	if Input.is_action_just_pressed("screenshot"):
+		var img = get_viewport().get_texture().get_data()
+		img.flip_y()
+		img.save_png("user://screenshot.png")
+		print("screenshot saved to ", OS.get_user_data_dir(), "/screenshot.png")
 	var act_obj = null
 	var act_dist = -1.0
 	var opos =  master_node.global_transform.origin
@@ -62,12 +67,14 @@ func _process(delta):
 			monitored_objects.push_back(act_obj)
 			if act_obj.is_in_group("characters"):
 				mon_labels[act_obj] = talk_icon.instance()
+				mon_labels[act_obj].rect_position = camera.unproject_position(act_obj.head_node.global_transform.origin) + Vector2(-40.0, -80.0)
 			else:
 				mon_labels[act_obj] = Button.new()
 				mon_labels[act_obj].text = act_obj.get_act()
+				mon_labels[act_obj].rect_position = camera.unproject_position(act_obj.global_transform.origin)
 			mon_labels[act_obj].connect("pressed", self, "emit_signal", ["action1", act_obj])
 			add_child(mon_labels[act_obj])
-			mon_labels[act_obj].rect_position = camera.unproject_position(act_obj.global_transform.origin)
+#			mon_labels[act_obj].rect_position = camera.unproject_position(act_obj.global_transform.origin)
 	for k in  monitored_objects:
 		var epos = k.global_transform.origin
 		var new_dist = opos.distance_squared_to(epos)
@@ -77,7 +84,11 @@ func _process(delta):
 			mon_labels.erase(k)
 			break
 		else:
-			mon_labels[k].rect_position = camera.unproject_position(k.global_transform.origin)
+			if k.is_in_group("characters"):
+				mon_labels[k].rect_position = camera.unproject_position(k.head_node.global_transform.origin)
+				mon_labels[k].rect_position += Vector2(-40.0, -80.0)
+			else:
+				mon_labels[k].rect_position = camera.unproject_position(k.global_transform.origin)
 		
 		
 var click2d: Vector2 = Vector2()

@@ -7,6 +7,7 @@ var aplay: AnimationPlayer
 const GRAVITY = Vector3(0, -9.8, 0)
 var ball_carry: Node
 var item_right_hand: Node
+var head_node: Node
 # Declare member variables here. Examples:
 # var a = 2
 # var b = "text"
@@ -36,6 +37,9 @@ func _ready():
 	add_to_group("characters")
 	add_to_group("activatable")
 	ball_carry = get_children()[0].get_children()[0].get_node("item_carry/ball_carry")
+	head_node = BoneAttachment.new()
+	skel.add_child(head_node)
+	head_node.bone_name = "head"
 
 func get_act():
 	return "Talk"
