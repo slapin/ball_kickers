@@ -13,6 +13,7 @@ var is_at_hands: bool = false
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	add_to_group("activatable")
+	add_to_group("items")
 
 func get_take_act():
 	return "Take item"

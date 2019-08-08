@@ -1,5 +1,8 @@
 extends Node
 class_name BallGameAI3D
+signal started_game
+signal stopped_game
+signal update_score
 
 var _cheers = {}
 var _game_area: AABB
@@ -15,8 +18,11 @@ var ch2team: Dictionary = {}
 var gate2team = {}
 var _gates = {}
 var _scores = {}
+var training_time = 0.0
+const max_training_time: float = 180.0
+const max_score: int = 6
 
-enum {STATE_INIT, STATE_START, STATE_RUNNING, STATE_FINISH}
+enum {STATE_INIT, STATE_START, STATE_RUNNING, STATE_GOAL, STATE_FINISH}
 func _ready():
 	_game_area = AABB()
 
@@ -46,8 +52,33 @@ func add_cheer_game_location(team: int, loc: Vector3):
 func set_team_start(team: int, v: Vector3):
 	_team_start[team] = v
 	_game_area = _game_area.expand(v)
-func check_goal(gate):
-	pass
+func check_goal(body, gate):
+	if _state in [STATE_RUNNING, STATE_GOAL]:
+		var team = gate2team[gate]
+		if body is RigidBody:
+			if body == _ball_instance:
+				_scores[team ^ 1] += 1
+				emit_signal("update_score", _scores)
+		elif body is KinematicBody && _ball_carrier != null:
+			if body == _ball_carrier.scene:
+				world.increase_xp(_ball_carrier, 150)
+				_scores[team] += 1
+				emit_signal("update_score", _scores)
+				catch_ball_delay += 3.0
+				_ball_carrier.scene.drop_object(_ball_instance)
+				_ball_instance.apply_impulse(Vector3(), Vector3(randf() - 0.5, randf() - 0.5, randf() - 0.5) * 10000.0)
+				_ball_carrier = null
+				_ball_team = -1
+				if _state == STATE_GOAL:
+					_state = STATE_RUNNING
+		print("score: ", _scores)
+		var max_team_score = -1
+		for k in _scores.keys():
+			if _scores[k] > max_team_score:
+				max_team_score = _scores[k]
+		if max_team_score >= max_score:
+			_state = STATE_FINISH
+
 func set_team_gate(team: int, gate: Area):
 	_gates[team] = gate
 	gate2team[gate] = team
@@ -79,6 +110,7 @@ func start_game():
 			loc += 1
 	for t in _teams.keys():
 		_scores[t] = 0
+	emit_signal("started_game", _scores)
 func stop_game():
 #	for k in get_tree().get_nodes_in_group("ball"):
 #		k.queue_free()
@@ -94,6 +126,10 @@ func stop_game():
 			world.increase_xp(e, min(e.xp * 2, min(100 * e.level, 1000)))
 		for e in _cheers[winner_team]:
 			world.increase_xp(e, min(e.xp * 2, min(200 * e.level, 2000)))
+	emit_signal("stopped_game", _scores)
+
+var ball_delay = 0.0
+var catch_ball_delay = 0.0
 func _physics_process(delta):
 	match(_state):
 		STATE_START:
@@ -117,3 +153,33 @@ func _physics_process(delta):
 							ch.scene.walkto(tgt)
 					else:
 							ch.scene.walkto(tgt)
+					if ch.scene.global_transform.origin.distance_to(tgt) < 0.6 && _ball_carrier == null && catch_ball_delay <= 0:
+						ch.scene.take_object(_ball_instance)
+						_state = STATE_GOAL
+						_ball_carrier = ch
+						_ball_team = t
+						ball_delay = 20.0
+						for tg in _teams.keys():
+							for ch in _teams[tg]:
+								if ch != _ball_carrier:
+									ch.scene.walkto(_gates[tg].global_transform.origin)
+								else:
+									ch.scene.walkto(_gates[tg ^ 1].global_transform.origin)
+						world.increase_xp(_ball_carrier, 50)
+			if catch_ball_delay > 0:
+				catch_ball_delay -= delta
+		STATE_GOAL:
+			ball_delay -= delta
+			if ball_delay <= 0 || randf() > 0.995:
+				if _ball_carrier:
+					_ball_carrier.scene.drop_object(_ball_instance)
+					_ball_carrier = null
+					_ball_team = -1
+					catch_ball_delay = 5.0
+				_state = STATE_RUNNING
+		STATE_FINISH:
+			stop_game()
+			_state = STATE_INIT
+	training_time += delta
+	if training_time >= max_training_time:
+		stop_game()

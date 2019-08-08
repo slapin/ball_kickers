@@ -43,8 +43,10 @@ func hire_as_cheer_team():
 		active_npc.walkto(dst)
 		world.cheer_team[newkey] = npc_data
 		print("line: ", world.line.size())
-		world.line.erase(npc_data.id)
-		npc_data.erase("id")
+		if npc_data.has("id"):
+			if world.line.has(npc_data.id):
+				world.line.erase(npc_data.id)
+			npc_data.erase("id")
 		print("line2: ", world.line.size())
 		npc_data.type = 0
 	hide()
@@ -54,12 +56,13 @@ func _ready():
 	$h/hire_cheer_team.connect("pressed", self, "hire_as_cheer_team")
 func start_interaction(npc):
 	active_npc = npc
-	show()
 	var npc_data: Dictionary = active_npc.get_meta("data")
-	if npc_data.gender == 0:
-		$h/hire_cheer_team.hide()
-	else:
-		$h/hire_cheer_team.show()
+	if npc_data.has("id"):
+		show()
+		if npc_data.gender == 0:
+			$h/hire_cheer_team.hide()
+		else:
+			$h/hire_cheer_team.show()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):

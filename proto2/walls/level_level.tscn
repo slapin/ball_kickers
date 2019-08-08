@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://walls/level_level.escn" type="PackedScene" id=1]
 [ext_resource path="res://walls/floor_material1.tres" type="Material" id=2]
+[ext_resource path="res://walls/gate_material.tres" type="Material" id=3]
 
 [node name="level_level" index="0" instance=ExtResource( 1 )]
 
@@ -25,3 +26,9 @@ material/1 = ExtResource( 2 )
 
 [node name="part1" parent="." index="6"]
 material/1 = ExtResource( 2 )
+
+[node name="gate1" parent="." index="9"]
+material/0 = ExtResource( 3 )
+
+[node name="gate2" parent="." index="10"]
+material/0 = ExtResource( 3 )

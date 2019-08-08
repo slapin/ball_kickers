@@ -78,7 +78,7 @@ func _process(delta):
 	for k in  monitored_objects:
 		var epos = k.global_transform.origin
 		var new_dist = opos.distance_squared_to(epos)
-		if new_dist > 6.0:
+		if new_dist > 6.0 || !k.is_in_group("activatable"):
 			monitored_objects.erase(k)
 			mon_labels[k].queue_free()
 			mon_labels.erase(k)

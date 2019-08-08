@@ -18,18 +18,21 @@ func _taken_act(pobj):
 	get_parent().remove_child(self)
 	if pobj.is_in_group("characters"):
 		pobj.ball_carry.add_child(self)
-		transform = Transform()
 		pobj.item_right_hand = self
 		remove_from_group("activatable")
+		print("character")
 	else:
 		pobj.add_child(self)
-		transform = Transform()
+		print("NOT character")
 	set_as_toplevel(false)
+	transform = Transform()
 	is_at_hands = true
+	print("ball: taken")
 func _dropped_act(pobj):
 	._dropped_act(get_parent())
 	pobj.item_right_hand = null
 	add_to_group("activatable")
+	print("ball: dropped")
 
 func get_take_act():
 	return "Take ball"
@@ -40,4 +43,6 @@ func get_drop_act():
 func activate():
 	if is_at_hands:
 		dropped(world.master_node)
-	world.emit_signal("start_training", self)
+		world.emit_signal("start_training", self)
+	else:
+		taken(world.master_node)

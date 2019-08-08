@@ -18,6 +18,9 @@ class StatsCheckObjective extends QuestObjective:
 				"cheerleader_count":
 					if world.cheer_team.keys().size() < stat_check[k]:
 						_complete = false
+				"team_train_count":
+					if world.team_train_count < stat_check[k]:
+						_complete = false
 				_:
 					_complete = false
 

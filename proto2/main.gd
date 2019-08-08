@@ -61,6 +61,11 @@ func start_training(ball):
 	ball_game.set_main(self)
 	ball_game.start_game()
 	add_child(ball_game)
+	ball_game.connect("stopped_game", self, "stop_training")
+func stop_training(score):
+	print("score:", score)
+	ball_game.queue_free()
+	world.team_train_count += 1
 
 func _ready():
 	var tstart = $nav/navmesh/level_level
