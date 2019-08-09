@@ -22,9 +22,9 @@ def main():
         src_dir_path = os.path.join(TEST_SCENE_DIR, dir_relpath)
         if os.path.exists(os.path.join(src_dir_path, "config.json")):
             with open(os.path.join(src_dir_path, "config.json")) as config_file:
-                config = json.load(config_file)
+                base_config = json.load(config_file)
         else:
-            config = {
+            base_config = {
                         "outpath": "exports",
                         "collections": [],
                         "use_visible_objects": True,
@@ -38,7 +38,7 @@ def main():
                         "use_beta_features": True,
                         "generate_external_material": False,
                         "animation_modes": "ACTIONS",
-                        "object_types": {"EMPTY", "LIGHT", "ARMATURE", "GEOMETRY"}
+                        "object_types": ["EMPTY", "LIGHT", "ARMATURE", "GEOMETRY"]
                      }
 
         # create exported to directory
@@ -52,6 +52,12 @@ def main():
                 # push dir into queue for later traversal
                 dir_queue.append(os.path.join(dir_relpath, item))
             elif item_abspath.endswith('blend'):
+                config = {}
+                for k, v in base_config.items():
+                    if k == "object_types":
+                        config[k] = set(v)
+                    else:
+                        config[k] = v
                 cpath = item_abspath.replace('.blend', '.json')
                 if os.path.exists(cpath):
                     _config = json.load(open(cpath))

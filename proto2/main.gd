@@ -15,6 +15,7 @@ func master_control(pos):
 	$master.walkto(pos)
 
 func update_quests():
+	$info/task/task.text = "No active tasks"
 	for q in world.quests:
 		if q.is_active():
 			$info/task/task.text = q.get_cur_task_text()
@@ -59,16 +60,34 @@ func start_training(ball):
 		ball_game.add_player(randi() % 2, world.team[ch])
 	ball_game.set_ball(ball)
 	ball_game.set_main(self)
-	ball_game.start_game()
 	add_child(ball_game)
 	ball_game.connect("stopped_game", self, "stop_training")
+	ball_game.connect("started_game", self, "init_training")
+	ball_game.connect("update_score", self, "update_training")
+	ball_game.start_game()
 func stop_training(score):
 	print("score:", score)
 	ball_game.queue_free()
 	world.team_train_count += 1
+	$score.hide()
+func init_training(score):
+	$score.show()
+	$score.release_focus()
+	update_training(score)
+func update_training(score):
+	var v:String = ""
+	var sdata = []
+	for k in score.keys():
+		sdata.push_back("%02d" % (score[k]))
+	print("score update = ", score)
+	v = PoolStringArray(sdata).join(":")
+	$score/v/l.text = v
+	$score/v/footer.text = "%.1f seconds left" % (ball_game.max_training_time - ball_game.training_time)
+	
 
 func _ready():
 	var tstart = $nav/navmesh/level_level
+	world.arrow = $Camera/arrow
 	var queue = [tstart]
 	while queue.size() > 0:
 		var item = queue[0]
@@ -113,9 +132,9 @@ func _ready():
 	tut_quest.connect("started", self, "start_quest")
 	world.quests.push_back(tut_quest)
 	var tut1_quest = WalkQuest.new("Walk to closet room", "Walk to closet room designated location", get_node("quest_dst_closet"))
-	var tut2_quest = StatsQuest.new("Hire team members", "Hire new team members to start with your team", {"player_count": 6})
+	var tut2_quest = StatsQuest.new("Hire 6 team members", "Hire six team members to start with your team", {"player_count": 6})
 	var tut3_quest = WalkQuest.new("Walk to gym", "Walk to gym designated location", get_node("quest_dst_gym"))
-	var tut4_quest = StatsQuest.new("Train your team", "Complete your team training once", {"team_train_count": 1})
+	var tut4_quest = StatsQuest.new("Train your team once", "Complete your team training once", {"team_train_count": 1})
 	tut1_quest.set_next_quest(tut2_quest)
 	tut2_quest.set_next_quest(tut3_quest)
 	tut3_quest.set_next_quest(tut4_quest)
@@ -129,8 +148,12 @@ func _ready():
 	quest_timer.start()
 	controls.connect("action1", self, "start_interaction")
 	world.connect("start_training", self, "start_training")
+	$info/task/show_journal.connect("pressed", $quest_journal, "show")
+	$score.hide()
 
 func _process(delta):
 	var pos = $master.global_transform.origin
 	pos.y = $Camera.global_transform.origin.y
 	$Camera.global_transform.origin = $Camera.global_transform.origin.linear_interpolate(pos, 0.8 * delta)
+	if $score.visible && ball_game != null:
+		update_training(ball_game._scores)

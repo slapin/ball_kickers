@@ -16,6 +16,7 @@ var training = false
 var nav: Navigation
 var quests : = []
 var team_train_count : = 0
+var arrow: Spatial
 
 func room_event(ev: String):
 	if current_room:

@@ -18,6 +18,7 @@ var ch2team: Dictionary = {}
 var gate2team = {}
 var _gates = {}
 var _scores = {}
+var _speeds = {}
 var training_time = 0.0
 const max_training_time: float = 180.0
 const max_score: int = 6
@@ -98,7 +99,7 @@ func start_game():
 			print(ch)
 			assert ch.scene != null
 			print("start: ", _team_start[t])
-			ch.scene.walkto(_team_start[t] + Vector3(randf() * 2.0 - 1.0, 0.0, randf() * 2.0 - 1.0))
+			ch.scene.walkto(_team_start[t] + Vector3(randf() * 2.0 - 1.0, 0.0, randf() * 2.0 - 1.0),  1.0 + ch.speed + randf() * ch.speed * 0.5)
 			start_timeout = 10.0
 	var loc = 0
 	for t in _cheers.keys():
@@ -106,7 +107,7 @@ func start_game():
 			assert ch != null
 			print(ch)
 			assert ch.scene != null
-			ch.scene.walkto(_cheer_locations[t][loc % _cheer_locations[t].size()])
+			ch.scene.walkto(_cheer_locations[t][loc % _cheer_locations[t].size()], 1.0 + ch.speed + randf() * ch.speed * 0.5)
 			loc += 1
 	for t in _teams.keys():
 		_scores[t] = 0
@@ -139,7 +140,10 @@ func _physics_process(delta):
 				for t in _teams.keys():
 					for ch in _teams[t]:
 #						print("teleport")
-						ch.scene.global_transform.origin = ch.scene._path[ch.scene._path.size() - 1]
+						if ch.scene._path.size() > 0:
+							ch.scene.global_transform.origin = ch.scene._path[ch.scene._path.size() - 1]
+						else:
+							ch.scene.global_transform.origin = _team_start[t] + Vector3(randf() * 2.0 - 1.0, 0.0, randf() * 2.0 - 1.0)
 				_state = STATE_RUNNING
 		STATE_RUNNING:
 #			print("running")
@@ -150,9 +154,9 @@ func _physics_process(delta):
 						var moveto = ch.scene._path[ch.scene._path.size() - 1]
 						if tgt.distance_squared_to(moveto) > 0.5:
 #							print("walking")
-							ch.scene.walkto(tgt)
+							ch.scene.walkto(tgt,  1.0 + ch.speed + randf() * ch.speed * 0.5)
 					else:
-							ch.scene.walkto(tgt)
+							ch.scene.walkto(tgt,  1.0 + ch.speed + randf() * ch.speed * 0.5)
 					if ch.scene.global_transform.origin.distance_to(tgt) < 0.6 && _ball_carrier == null && catch_ball_delay <= 0:
 						ch.scene.take_object(_ball_instance)
 						_state = STATE_GOAL
@@ -162,9 +166,9 @@ func _physics_process(delta):
 						for tg in _teams.keys():
 							for ch in _teams[tg]:
 								if ch != _ball_carrier:
-									ch.scene.walkto(_gates[tg].global_transform.origin)
+									ch.scene.walkto(_gates[tg].global_transform.origin,  1.0 + ch.speed + randf() * ch.speed * 0.5)
 								else:
-									ch.scene.walkto(_gates[tg ^ 1].global_transform.origin)
+									ch.scene.walkto(_gates[tg ^ 1].global_transform.origin,  1.0 + ch.speed + randf() * ch.speed * 0.5)
 						world.increase_xp(_ball_carrier, 50)
 			if catch_ball_delay > 0:
 				catch_ball_delay -= delta

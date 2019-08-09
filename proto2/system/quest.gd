@@ -71,7 +71,7 @@ func get_cur_task_text():
 				return ret
 		for p in _objectives:
 			if !p.is_complete():
-				return p.get_title()
+				return get_title() + ": " + p.get_title()
 		return _title
 	return ret
 func get_title():

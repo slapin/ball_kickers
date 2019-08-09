@@ -24,6 +24,7 @@ func _process(delta):
 			expose_time = 0.0
 			cooldown_time = 2.0
 			show()
+			release_focus()
 	if expose_time > 10.0:
 		if visible:
 			hide()
