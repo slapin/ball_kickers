@@ -7,7 +7,7 @@ extends Control
 # Called when the node enters the scene tree for the first time.
 
 func start_game():
-	var sc = load("res://main.tscn")
+	var sc = load("res://ui/act1_start.tscn")
 	world.init_data()
 	get_tree().change_scene_to(sc)
 func load_game():
@@ -26,8 +26,3 @@ func _ready():
 	$"VBoxContainer/load".connect("pressed", self, "load_game")
 	$VBoxContainer/options.connect("pressed", self, "display_options")
 	$VBoxContainer/development.connect("pressed", self, "display_development")
-	
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass

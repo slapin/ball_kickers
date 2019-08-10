@@ -1,0 +1,71 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://fonts/DroidSansFallback.ttf" type="DynamicFontData" id=1]
+[ext_resource path="res://ui/act1_start.gd" type="Script" id=2]
+
+[sub_resource type="DynamicFont" id=1]
+size = 80
+use_mipmaps = true
+use_filter = true
+font_data = ExtResource( 1 )
+
+[sub_resource type="DynamicFont" id=2]
+size = 40
+use_mipmaps = true
+use_filter = true
+font_data = ExtResource( 1 )
+
+[sub_resource type="DynamicFont" id=3]
+size = 24
+use_mipmaps = true
+use_filter = true
+font_data = ExtResource( 1 )
+
+[node name="act1_start" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Panel" type="Panel" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="v" type="VBoxContainer" parent="Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="Panel/v"]
+margin_right = 1024.0
+margin_bottom = 506.0
+size_flags_vertical = 7
+custom_fonts/font = SubResource( 1 )
+text = "Act I"
+align = 1
+
+[node name="Label2" type="Label" parent="Panel/v"]
+margin_top = 510.0
+margin_right = 1024.0
+margin_bottom = 563.0
+size_flags_horizontal = 3
+custom_fonts/font = SubResource( 2 )
+text = "\"Here goes our hero\""
+align = 1
+
+[node name="Label3" type="Label" parent="Panel/v"]
+margin_top = 567.0
+margin_right = 1024.0
+margin_bottom = 600.0
+size_flags_horizontal = 3
+size_flags_vertical = 5
+custom_fonts/font = SubResource( 3 )
+text = "In which our hero makes his appearance"
+align = 1
