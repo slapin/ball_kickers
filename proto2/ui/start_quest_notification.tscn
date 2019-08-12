@@ -1,6 +1,34 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://ui/start_quest_notification.gd" type="Script" id=1]
+[ext_resource path="res://fonts/DroidSansFallback.ttf" type="DynamicFontData" id=2]
+
+[sub_resource type="DynamicFont" id=1]
+size = 36
+outline_size = 1
+outline_color = Color( 0, 0, 0, 1 )
+use_filter = true
+font_data = ExtResource( 2 )
+
+[sub_resource type="DynamicFont" id=2]
+size = 30
+outline_size = 1
+outline_color = Color( 0, 0, 0, 1 )
+font_data = ExtResource( 2 )
+
+[sub_resource type="DynamicFont" id=3]
+size = 24
+outline_size = 1
+outline_color = Color( 0, 0, 0, 1 )
+use_mipmaps = true
+use_filter = true
+font_data = ExtResource( 2 )
+
+[sub_resource type="DynamicFont" id=4]
+size = 20
+outline_size = 1
+outline_color = Color( 0, 0, 0, 1 )
+font_data = ExtResource( 2 )
 
 [node name="start_quest_notification" type="Control"]
 anchor_left = 0.5
@@ -22,37 +50,42 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -93.0
-margin_top = -34.0
-margin_right = 93.0
-margin_bottom = 34.0
+margin_left = -250.0
+margin_top = -82.0
+margin_right = 250.0
+margin_bottom = 82.0
+rect_min_size = Vector2( 500, 164 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="msg" type="Label" parent="v"]
-margin_right = 186.0
-margin_bottom = 14.0
+margin_right = 500.0
+margin_bottom = 48.0
+custom_fonts/font = SubResource( 1 )
 text = "Starting quest:"
 align = 1
 
 [node name="quest_title" type="Label" parent="v"]
-margin_top = 18.0
-margin_right = 186.0
-margin_bottom = 32.0
+margin_top = 52.0
+margin_right = 500.0
+margin_bottom = 92.0
+custom_fonts/font = SubResource( 2 )
 text = "quest title"
 align = 1
 
 [node name="quest_desc" type="Label" parent="v"]
-margin_top = 36.0
-margin_right = 186.0
-margin_bottom = 50.0
+margin_top = 96.0
+margin_right = 500.0
+margin_bottom = 129.0
+custom_fonts/font = SubResource( 3 )
 text = "quest description"
 align = 3
 
 [node name="msg2" type="Label" parent="v"]
-margin_top = 54.0
-margin_right = 186.0
-margin_bottom = 68.0
+margin_top = 133.0
+margin_right = 500.0
+margin_bottom = 160.0
+custom_fonts/font = SubResource( 4 )
 text = "Quest added to your journal"
 align = 1

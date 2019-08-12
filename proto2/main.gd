@@ -24,8 +24,8 @@ func update_quests():
 		if q.is_active():
 			q.update()
 func start_quest(quest: Quest):
-	$start_quest_notification.start_notification(quest.get_title(), quest.get_description())
-
+	notifications.quest_notfication(quest.get_title(), quest.get_description())
+	
 func start_interaction(obj):
 	print("started interaction")
 	if obj.is_in_group("characters"):
@@ -52,12 +52,15 @@ func start_training(ball):
 			ball_game.set_team_start(1, k.global_transform.origin)
 		elif k.name == "gate":
 			ball_game.set_team_gate(1, k)
+	var t_start = randi() % 2
 	for ch in world.cheer_team.keys():
 		assert world.cheer_team[ch] != null
-		ball_game.add_cheer(randi() % 2, world.cheer_team[ch])
+		ball_game.add_cheer(t_start, world.cheer_team[ch])
+		t_start ^= 1
 	for ch in world.team.keys():
 		assert world.team[ch] != null
-		ball_game.add_player(randi() % 2, world.team[ch])
+		ball_game.add_player(t_start, world.team[ch])
+		t_start ^= 1
 	ball_game.set_ball(ball)
 	ball_game.set_main(self)
 	add_child(ball_game)
@@ -132,9 +135,13 @@ func _ready():
 	tut_quest.connect("started", self, "start_quest")
 	world.quests.push_back(tut_quest)
 	var tut1_quest = WalkQuest.new("Walk to closet room", "Walk to closet room designated location", get_node("quest_dst_closet"))
+	tut1_quest.connect("started", self, "start_quest")
 	var tut2_quest = StatsQuest.new("Hire 6 team members", "Hire six team members to start with your team", {"player_count": 6})
+	tut2_quest.connect("started", self, "start_quest")
 	var tut3_quest = WalkQuest.new("Walk to gym", "Walk to gym designated location", get_node("quest_dst_gym"))
+	tut3_quest.connect("started", self, "start_quest")
 	var tut4_quest = StatsQuest.new("Train your team once", "Complete your team training once", {"team_train_count": 1})
+	tut4_quest.connect("started", self, "start_quest")
 	tut1_quest.set_next_quest(tut2_quest)
 	tut2_quest.set_next_quest(tut3_quest)
 	tut3_quest.set_next_quest(tut4_quest)
