@@ -1,0 +1,4 @@
+{
+	"object_types": ["EMPTY", "LIGHT", "GEOMETRY"],
+	"outpath": "vehicles/cars"
+}
