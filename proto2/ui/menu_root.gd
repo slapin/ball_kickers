@@ -9,6 +9,7 @@ extends Control
 func start_game():
 	var sc = load("res://ui/act1_start.tscn")
 	world.init_data()
+	roadmap.build(444444)
 	get_tree().change_scene_to(sc)
 func load_game():
 	pass
