@@ -14,8 +14,11 @@ var room_events = {}
 var line = {}
 var training = false
 var nav: Navigation
+# warning-ignore:unused_class_variable
 var quests : = []
+# warning-ignore:unused_class_variable
 var team_train_count : = 0
+# warning-ignore:unused_class_variable
 var arrow: Spatial
 
 func room_event(ev: String):
@@ -32,6 +35,7 @@ func register_room_event(roomobj, evname, fname):
 func _ready():
 	connect("room_event", self, "room_event")
 
+# warning-ignore:unused_class_variable
 var master_stats:Dictionary = {
 	"type": 0,
 	"gender": 0,
