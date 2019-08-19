@@ -29,21 +29,21 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Panel" type="Panel" parent="."]
+[node name="p" type="Panel" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="v" type="VBoxContainer" parent="Panel"]
+[node name="v" type="VBoxContainer" parent="p"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="Panel/v"]
+[node name="Label" type="Label" parent="p/v"]
 margin_right = 1024.0
 margin_bottom = 506.0
 size_flags_vertical = 7
@@ -51,7 +51,7 @@ custom_fonts/font = SubResource( 1 )
 text = "Act I"
 align = 1
 
-[node name="Label2" type="Label" parent="Panel/v"]
+[node name="Label2" type="Label" parent="p/v"]
 margin_top = 510.0
 margin_right = 1024.0
 margin_bottom = 563.0
@@ -60,7 +60,7 @@ custom_fonts/font = SubResource( 2 )
 text = "\"Here goes our hero\""
 align = 1
 
-[node name="Label3" type="Label" parent="Panel/v"]
+[node name="Label3" type="Label" parent="p/v"]
 margin_top = 567.0
 margin_right = 1024.0
 margin_bottom = 600.0

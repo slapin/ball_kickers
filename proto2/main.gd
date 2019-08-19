@@ -91,6 +91,7 @@ func update_training(score):
 	
 
 func _ready():
+	notifications.set_main(self)
 	var tstart = $nav/navmesh/level_level
 	world.arrow = $Camera/arrow
 	var queue = [tstart]

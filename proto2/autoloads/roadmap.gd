@@ -25,6 +25,7 @@ var vertex_queue = []
 var vertices = []
 var front = []
 var lots: Lots
+var grid: GridData
 
 class Lots:
 	enum {LOT_FOREST, LOT_AIRPORT, LOT_PARK, LOT_CEMETERY, LOT_RESIDENTAL, LOT_INDUSTRIAL}
@@ -150,11 +151,61 @@ class Lots:
 						continue
 					lots.push_back({
 						"polygon": polygon,
-						"xform": xform
+						"xform": xform,
+						"type": lot_types[lot_type_name].type,
+						"type_name": lot_type_name
 					})
 					break
-			
 
+func get_point3d(v: Vector2):
+	var v3d : = Vector3()
+	v3d.x = v.x - map_width * 0.5
+	v3d.z = v.y - map_height * 0.5
+
+class GridData:
+	var grid = {}
+	var p2id = {}
+	func _point2grid(v: Vector2):
+		var grid_x = int(v.x / 100.0)
+		var grid_y = int(v.y / 100.0)
+		return hash([grid_x, grid_y])
+	func add_point_to_grid(p: Vector2, id: int) -> bool:
+		var g = _point2grid(p)
+		if grid.has(g):
+			if !p in grid[g]:
+				grid[g].push_back(p)
+				p2id[p] = id
+				return true
+			else:
+				return false
+		else:
+			grid[g] = PoolVector2Array()
+			grid[g].push_back(p)
+			p2id[p] = id
+			return true
+	func radius_search(p: Vector2, radius: float):
+		var p0 = Vector2(p.x - radius, p.y - radius)
+		var p1 = Vector2(p.x + radius, p.y + radius)
+		var p0x = _point2grid(p0) - Vector2(1, 1)
+		var p1x = _point2grid(p0) + Vector2(1, 1)
+		var posx = int(p0x.x)
+		var posy = int(p0x.y)
+		var rangex = p1x - p0x
+		var rangex_x = int(rangex.x)
+		var rangex_y = int(rangex.y)
+		var points = []
+		for gy in range(rangex_y):
+			for gx in range(rangex_x):
+				var id = hash([posx + gx, posy + gy])
+				if grid.has(id):
+					points += Array(grid[id])
+		var radius_sq = radius * radius
+		var ret = PoolIntArray()
+		for e in points:
+			if e.distance_squared_to(p) <= radius_sq:
+				ret.push_back(p2id[e])
+		return ret
+		
 #class PointDB:
 #	var _points: PoolVector2Array = PoolVector2Array()
 #	var _triangles: PoolIntArray = PoolIntArray()
@@ -1270,6 +1321,9 @@ func _process(delta):
 			state = STATE_POLYGONS2
 			print("polygons built")
 		STATE_POLYGONS2:
+			grid = GridData.new()
+			for v in range(vertices.size()):
+				grid.add_point_to_grid(vertices[v].pos, v)
 #			if polygon_queue.size() > 0:
 #				var item = polygon_queue.pop_front()
 #				var p1 = item[0]

@@ -7,7 +7,7 @@ extends Control
 # Called when the node enters the scene tree for the first time.
 
 func start_game():
-	var sc = load("res://ui/act1_start.tscn")
+	var sc = load("res://prologue.tscn")
 	world.init_data()
 	roadmap.build(444444)
 	get_tree().change_scene_to(sc)
