@@ -25,6 +25,8 @@ func update_quests():
 			q.update()
 func start_quest(quest: Quest):
 	notifications.quest_notfication(quest.get_title(), quest.get_description())
+func complete_quest(quest: Quest):
+	notifications.quest_complete_notfication(quest.get_title(), quest.get_description())
 	
 func start_interaction(obj):
 	print("started interaction")
@@ -133,15 +135,20 @@ func _ready():
 #		cd.scene.set_meta("data", cd)
 	var tut_quest = Quest.new("Tutorial", "This quest shortly introduces to a game")
 	tut_quest.connect("started", self, "start_quest")
+	tut_quest.connect("complete", self, "complete_quest")
 	world.quests.push_back(tut_quest)
 	var tut1_quest = WalkQuest.new("Walk to closet room", "Walk to closet room designated location", get_node("quest_dst_closet"))
 	tut1_quest.connect("started", self, "start_quest")
+	tut1_quest.connect("complete", self, "complete_quest")
 	var tut2_quest = StatsQuest.new("Hire 6 team members", "Hire six team members to start with your team", {"player_count": 6})
 	tut2_quest.connect("started", self, "start_quest")
+	tut2_quest.connect("complete", self, "complete_quest")
 	var tut3_quest = WalkQuest.new("Walk to gym", "Walk to gym designated location", get_node("quest_dst_gym"))
 	tut3_quest.connect("started", self, "start_quest")
+	tut3_quest.connect("complete", self, "complete_quest")
 	var tut4_quest = StatsQuest.new("Train your team once", "Complete your team training once", {"team_train_count": 1})
 	tut4_quest.connect("started", self, "start_quest")
+	tut4_quest.connect("complete", self, "complete_quest")
 	tut1_quest.set_next_quest(tut2_quest)
 	tut2_quest.set_next_quest(tut3_quest)
 	tut3_quest.set_next_quest(tut4_quest)

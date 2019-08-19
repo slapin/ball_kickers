@@ -1,21 +1,21 @@
 extends Node
 signal complete
 
-var map_width = 768
-var map_height = 768
+var map_width = 1280
+var map_height = 1280
 var map_rect = Rect2(0, 0, map_width, map_height)
 
 enum {STATE_INIT, STATE_ITERATION, STATE_EDGES1, STATE_EDGES2, STATE_EDGES3, STATE_POLYGONS1, STATE_POLYGONS2, STATE_COMPLETE}
 var state = STATE_INIT
 
-var min_distance = 3.0
+var min_distance = 12.0
 var pgrow = 0.5
 
 var rules = {}
 var edges = []
 var pos2vertex = {}
-var points = []
-var triangles = []
+var lot_points = []
+var lot_triangles = []
 var pos2edge = {}
 var road_width: float = 6.0
 var pos2id = {}
@@ -24,148 +24,278 @@ var maxpos = Vector2()
 var vertex_queue = []
 var vertices = []
 var front = []
-var polygons = []
-var extra_points = []
-var polygon_queue = []
-var road_points:PoolVector2Array = PoolVector2Array()
+var lots: Lots
 
-class PointDB:
-	var _points: PoolVector2Array = PoolVector2Array()
-	var _triangles: PoolIntArray = PoolIntArray()
-	var _grid: Array = []
-	var _grid_size: int = -1
-	var grid_w: int
-	var grid_h: int
-	var grid_offset: Vector2
-	var _edges = {}
-	var _eid2id = {}
-	var _id2data = {}
-	var _id2pos = {}
-	var _pos2id = {}
-	var _id2edge = {}
-	var _edge2data = {}
-	func build_grid(points: Array, grid_size: int):
-		_points = points
-		_triangles = Geometry.triangulate_delaunay_2d(_points)
-		_grid_size = grid_size
-		_pos2id.clear()
-		_id2pos.clear()
-		_id2data.clear()
-		_id2edge.clear()
-		_grid.clear()
-		_edges.clear()
-		_edge2data.clear()
-		var rect: Rect2 = Rect2()
-		for p in range(_points.size()):
-			rect = rect.expand(_points[p])
-			_pos2id[_points[p]] = p
-			_id2pos[p] = _points[p]
-		rect.position.x = floor(rect.position.x / grid_size - 1) * grid_size
-		rect.position.y = floor(rect.position.x / grid_size - 1) * grid_size
-		rect.size.x = ceil(rect.size.x / grid_size + 1) * grid_size
-		rect.size.y = ceil(rect.size.x / grid_size + 1) * grid_size
-		grid_w = int((rect.size.x + 1)/ grid_size)
-		grid_h = int((rect.size.x + 1)/ grid_size)
-		grid_offset = rect.position
-		_grid.resize((grid_w + 1) * (grid_h + 1))
-		for p in range(_points.size()):
-			var grid_x = int((_points[p].x - grid_offset.x) / grid_size)
-			var grid_y = int((_points[p].y - grid_offset.y) / grid_size)
-			if !_grid[grid_w * grid_y + grid_x]:
-				_grid[grid_w * grid_y + grid_x] = PoolIntArray()
-			_grid[grid_w * grid_y + grid_x].push_back(p)
-		for tri in range(0, _triangles.size(), 3):
-			var p1 = _triangles[tri + 0]
-			var p2 = _triangles[tri + 1]
-			var p3 = _triangles[tri + 2]
-			add_edge_id(p1, p2)
-			add_edge_id(p2, p3)
-			add_edge_id(p3, p1)
-	func add_point_data(p: Vector2, data: Dictionary):
-		if _pos2id.has(p):
-			_id2data[_pos2id[p]] = data
-		else:
-			breakpoint
-			print_debug("Bad point added")
-	func get_point_data(p: Vector2) -> Dictionary:
-		if _pos2id.has(p):
-			return _id2data[_pos2id[p]]
-		else:
-			return {}
-	func add_edge_id(a: int, b: int):
-		var edge_id = hash([a, b])
-		_edges[edge_id] = [a, b]
-		if _id2edge.has(a):
-			_id2edge[a].push_back(edge_id)
-		else:
-			_id2edge[a] = [edge_id]
-		if _id2edge.has(b):
-			_id2edge[b].push_back(edge_id)
-		else:
-			_id2edge[b] = [edge_id]
-	func add_edge(a: Vector2, b: Vector2):
-		if _pos2id.has(a) && _pos2id.has(b):
-			add_edge_id(_pos2id[a], _pos2id[b])
-		else:
-			breakpoint
-			print_debug("Bad edge added")
-	func add_edge_data(a: Vector2, b: Vector2, data: Dictionary):
-		assert a in _points
-		assert b in _points
-		var ai = _pos2id[a]
-		var bi = _pos2id[b]
-		var edge_id = hash([ai, bi])
-		var edge_id_rev = hash([bi, ai])
-		if _edges.has(edge_id):
-			_edge2data[edge_id] = data
-			return true
-		elif _edges.has(edge_id_rev):
-			_edge2data[edge_id_rev] = data
-			return true
-		else:
-			print_debug("No such edge ", [a, b])
-			return false
-	func get_edge_data(a: Vector2, b: Vector2) -> Dictionary:
-		var ai = _pos2id[a]
-		var bi = _pos2id[b]
-		var edge_id = hash([ai, bi])
-		var edge_id_rev = hash([bi, ai])
-		if _edge2data.has(edge_id):
-			return _edge2data[edge_id]
-		elif _edge2data.has(edge_id_rev):
-			return _edge2data[edge_id_rev]
-		else:
-			return {}
-	func get_point_edges(a: Vector2) -> Array:
-		var ret : = []
-		var edges = _id2edge[_pos2id[a]]
-		for e in edges:
-			var ed = _edges[e]
-			ret.push_back([_id2pos[ed[0]], _id2pos[ed[1]]])
+class Lots:
+	enum {LOT_FOREST, LOT_AIRPORT, LOT_PARK, LOT_CEMETERY, LOT_RESIDENTAL, LOT_INDUSTRIAL}
+	var lot_types = {
+		"forest": {
+			"w": 500,
+			"h": 500,
+			"type": LOT_FOREST,
+			"center_distance": 400.0
+		},
+		"airport": {
+			"w": 500,
+			"h": 500,
+			"type": LOT_AIRPORT,
+			"center_distance": 400.0
+		},
+		"park": {
+			"w": 300,
+			"h": 300,
+			"type": LOT_PARK,
+			"center_distance": 0.0
+		},
+		"cemetery": {
+			"w": 200,
+			"h": 200,
+			"type": LOT_CEMETERY,
+			"center_distance": 0.0
+		},
+		"residental1": {
+			"w": 100,
+			"h": 100,
+			"type": LOT_RESIDENTAL,
+			"center_distance": 0.0
+		},
+		"residental2": {
+			"w": 50,
+			"h": 50,
+			"type": LOT_RESIDENTAL,
+			"center_distance": 0.0
+		},
+		"residental3": {
+			"w": 20,
+			"h": 20,
+			"type": LOT_RESIDENTAL,
+			"center_distance": 0.0
+		},
+		"industrial": {
+			"w": 100,
+			"h": 100,
+			"type": LOT_RESIDENTAL,
+			"center_distance": 200.0
+		},
+	}
+	var lots = []
+	func make_lot_polygon(lot_name: String):
+		var lot_type = lot_types[lot_name]
+		var p1 = Vector2(-lot_type.w * 0.5, -lot_type.h * 0.5)
+		var p2 = Vector2(lot_type.w * 0.5, -lot_type.h * 0.5)
+		var p3 = Vector2(lot_type.w * 0.5, lot_type.h * 0.5)
+		var p4 = Vector2(-lot_type.w * 0.5, lot_type.h * 0.5)
+		return [p1, p2, p3, p4]
+#	func get_polygon_center(polygon):
+#		var ret: Vector2 = Vector2()
+#		for m in range(polygon.size()):
+#			ret += polygon[m]
+#		return ret / 4.0
+	func get_lot_transform(p1: Vector2, p2: Vector2, road_width: float, sidewalk_width: float, polygon: Array):
+		var n = (p2-p1).tangent().normalized()
+		var offset1 = n * (road_width + sidewalk_width)
+		var offset2 = Vector2()
+		for v in range(polygon.size()):
+			if offset2.x < polygon[v].x:
+				offset2.x = polygon[v].x
+			if offset2.y < polygon[v].y:
+				offset2.y = polygon[v].y
+		var ret = Transform2D((p2 - p1).angle(), p1.linear_interpolate(p2, 0.5) + offset1 + offset2)
 		return ret
-	func get_polygons() -> Array:
-		var ret = []
-		for t in range(0, _triangles.size(), 3):
-			var p1 = _points[_triangles[t + 0]]
-			var p2 = _points[_triangles[t + 1]]
-			var p3 = _points[_triangles[t + 2]]
-			ret.push_back([p1, p2, p3, get_edge_data(p1, p2), get_edge_data(p2, p3), get_edge_data(p3, p1)])
-		return ret
+	func transformed_polygon(xform: Transform2D, polygon: Array):
+		return Array(Geometry.transform_points_2d(PoolVector2Array(polygon), xform))
+	func polygon_intersects_road(polygon, vertices):
+		for v in range(vertices.size()):
+			var p1 = vertices[v].pos
+			for k in vertices[v]._neighbors:
+				var p2 = vertices[k].pos
+				if Geometry.segment_intersects_segment_2d(p1, p2, polygon[0], polygon[1]):
+					return true
+				if Geometry.segment_intersects_segment_2d(p1, p2, polygon[1], polygon[2]):
+					return true
+				if Geometry.segment_intersects_segment_2d(p1, p2, polygon[2], polygon[3]):
+					return true
+				if Geometry.segment_intersects_segment_2d(p1, p2, polygon[3], polygon[0]):
+					return true
+				if Geometry.point_is_inside_triangle(p1, polygon[0], polygon[1], polygon[2]):
+					return true
+				if Geometry.point_is_inside_triangle(p1, polygon[0], polygon[2], polygon[3]):
+					return true
+				if Geometry.point_is_inside_triangle(p2, polygon[0], polygon[1], polygon[2]):
+					return true
+				if Geometry.point_is_inside_triangle(p2, polygon[0], polygon[2], polygon[3]):
+					return true
+		return false
+	func generate_lots(vertices, road_width, sidewalk_width, map_width, map_height):
+		for v in range(vertices.size()):
+			var p1 = vertices[v].pos
+			for k in vertices[v]._neighbors:
+				for d in range(10):
+					var p2 = vertices[k].pos
+					var lot_type_name = lot_types.keys()[randi() % lot_types.keys().size()]
+					var polygon = make_lot_polygon(lot_type_name)
+					var xform = get_lot_transform(p1, p2, road_width, sidewalk_width, polygon)
+					if polygon_intersects_road(transformed_polygon(xform, polygon), vertices):
+						continue
+					var xfpoly = transformed_polygon(xform, polygon)
+					var bad = false
+					for r in lots:
+						var poly2 = transformed_polygon(r.xform, r.polygon)
+						if Geometry.intersect_polygons_2d(xfpoly, poly2).size() > 0:
+							bad = true
+							break
+					if xform.origin.distance_to(Vector2(map_width * 0.5, map_height * 0.5)) < lot_types[lot_type_name].center_distance:
+						bad = true
+					if bad:
+						continue
+					lots.push_back({
+						"polygon": polygon,
+						"xform": xform
+					})
+					break
+			
+
+#class PointDB:
+#	var _points: PoolVector2Array = PoolVector2Array()
+#	var _triangles: PoolIntArray = PoolIntArray()
+#	var _grid: Array = []
+#	var _grid_size: int = -1
+#	var grid_w: int
+#	var grid_h: int
+#	var grid_offset: Vector2
+#	var _edges = {}
+#	var _eid2id = {}
+#	var _id2data = {}
+#	var _id2pos = {}
+#	var _pos2id = {}
+#	var _id2edge = {}
+#	var _edge2data = {}
+#	func build_grid(points: Array, grid_size: int):
+#		_points = points
+#		_triangles = Geometry.triangulate_delaunay_2d(_points)
+#		_grid_size = grid_size
+#		_pos2id.clear()
+#		_id2pos.clear()
+#		_id2data.clear()
+#		_id2edge.clear()
+#		_grid.clear()
+#		_edges.clear()
+#		_edge2data.clear()
+#		var rect: Rect2 = Rect2()
+#		for p in range(_points.size()):
+#			rect = rect.expand(_points[p])
+#			_pos2id[_points[p]] = p
+#			_id2pos[p] = _points[p]
+#		rect.position.x = floor(rect.position.x / grid_size - 1) * grid_size
+#		rect.position.y = floor(rect.position.x / grid_size - 1) * grid_size
+#		rect.size.x = ceil(rect.size.x / grid_size + 1) * grid_size
+#		rect.size.y = ceil(rect.size.x / grid_size + 1) * grid_size
+#		grid_w = int((rect.size.x + 1)/ grid_size)
+#		grid_h = int((rect.size.x + 1)/ grid_size)
+#		grid_offset = rect.position
+#		_grid.resize((grid_w + 1) * (grid_h + 1))
+#		for p in range(_points.size()):
+#			var grid_x = int((_points[p].x - grid_offset.x) / grid_size)
+#			var grid_y = int((_points[p].y - grid_offset.y) / grid_size)
+#			if !_grid[grid_w * grid_y + grid_x]:
+#				_grid[grid_w * grid_y + grid_x] = PoolIntArray()
+#			_grid[grid_w * grid_y + grid_x].push_back(p)
+#		for tri in range(0, _triangles.size(), 3):
+#			var p1 = _triangles[tri + 0]
+#			var p2 = _triangles[tri + 1]
+#			var p3 = _triangles[tri + 2]
+#			add_edge_id(p1, p2)
+#			add_edge_id(p2, p3)
+#			add_edge_id(p3, p1)
+#	func add_point_data(p: Vector2, data: Dictionary):
+#		if _pos2id.has(p):
+#			_id2data[_pos2id[p]] = data
+#		else:
+#			breakpoint
+#			print_debug("Bad point added")
+#	func get_point_data(p: Vector2) -> Dictionary:
+#		if _pos2id.has(p):
+#			return _id2data[_pos2id[p]]
+#		else:
+#			return {}
+#	func add_edge_id(a: int, b: int):
+#		var edge_id = hash([a, b])
+#		_edges[edge_id] = [a, b]
+#		if _id2edge.has(a):
+#			_id2edge[a].push_back(edge_id)
+#		else:
+#			_id2edge[a] = [edge_id]
+#		if _id2edge.has(b):
+#			_id2edge[b].push_back(edge_id)
+#		else:
+#			_id2edge[b] = [edge_id]
+#	func add_edge(a: Vector2, b: Vector2):
+#		if _pos2id.has(a) && _pos2id.has(b):
+#			add_edge_id(_pos2id[a], _pos2id[b])
+#		else:
+#			breakpoint
+#			print_debug("Bad edge added")
+#	func add_edge_data(a: Vector2, b: Vector2, data: Dictionary):
+#		assert a in _points
+#		assert b in _points
+#		var ai = _pos2id[a]
+#		var bi = _pos2id[b]
+#		var edge_id = hash([ai, bi])
+#		var edge_id_rev = hash([bi, ai])
+#		if _edges.has(edge_id):
+#			_edge2data[edge_id] = data
+#			return true
+#		elif _edges.has(edge_id_rev):
+#			_edge2data[edge_id_rev] = data
+#			return true
+#		else:
+#			print_debug("No such edge ", [a, b])
+#			return false
+#	func get_edge_data(a: Vector2, b: Vector2) -> Dictionary:
+#		var ai = _pos2id[a]
+#		var bi = _pos2id[b]
+#		var edge_id = hash([ai, bi])
+#		var edge_id_rev = hash([bi, ai])
+#		if _edge2data.has(edge_id):
+#			return _edge2data[edge_id]
+#		elif _edge2data.has(edge_id_rev):
+#			return _edge2data[edge_id_rev]
+#		else:
+#			return {}
+#	func get_point_edges(a: Vector2) -> Array:
+#		var ret : = []
+#		var edges = _id2edge[_pos2id[a]]
+#		for e in edges:
+#			var ed = _edges[e]
+#			ret.push_back([_id2pos[ed[0]], _id2pos[ed[1]]])
+#		return ret
+#	func get_polygons() -> Array:
+#		var ret = []
+#		for t in range(0, _triangles.size(), 3):
+#			var p1 = _points[_triangles[t + 0]]
+#			var p2 = _points[_triangles[t + 1]]
+#			var p3 = _points[_triangles[t + 2]]
+#			ret.push_back([p1, p2, p3, get_edge_data(p1, p2), get_edge_data(p2, p3), get_edge_data(p3, p1)])
+#		return ret
+
 
 
 var rnd: RandomNumberGenerator
 var noise: OpenSimplexNoise
 var complete = false
-var db: PointDB
+#var db: PointDB
 
 var axiom = [
 	new_vertex(10, 10),
-	new_vertex(30, 30),
-	new_vertex(50, 50),
-	new_vertex(10, 70),
-	new_vertex(80, 100),
-	new_vertex(240, 100),
-	new_vertex(280, 100)
+	new_vertex(60, 10),
+	new_vertex(110, 10),
+	new_vertex(110, 60),
+	new_vertex(110, 110),
+	new_vertex(110, 160),
+	new_vertex(60, 160),
+	new_vertex(10, 160),
+	new_vertex(10, 110),
+	new_vertex(10, 60),
 ]
 
 
@@ -176,12 +306,9 @@ func cleanup():
 	vertices.clear()
 	edges.clear()
 	pos2vertex.clear()
-	points.clear()
-	triangles.clear()
 	pos2edge.clear()
 	pos2id.clear()
 	front.clear()
-	polygons.clear()
 
 func new_vertex(x, y):
 	return {
@@ -331,6 +458,8 @@ func convert_vertices():
 	for e in range(vertices.size()):
 		vertices[e]._neighbors = []
 		for h in vertices[e].neighbors:
+			assert h
+#			print(pos2vertex[h.pos])
 			vertices[e]._neighbors.push_back(pos2vertex[h.pos]._index)
 func has_neighbor(v, n):
 	var ret = false
@@ -577,27 +706,29 @@ func adjacent_edges(e1, e2):
 		return true
 	else:
 		return false
-func check_triangles():
-	for t in triangles:
-		if !adjacent_edges(t[0], t[1]):
-			return false
-		if !adjacent_edges(t[1], t[2]):
-			return false
-		if !adjacent_edges(t[2], t[0]):
-			return false
-	return true
+#func check_triangles():
+#	for t in triangles:
+#		if !adjacent_edges(t[0], t[1]):
+#			return false
+#		if !adjacent_edges(t[1], t[2]):
+#			return false
+#		if !adjacent_edges(t[2], t[0]):
+#			return false
+#	return true
 		
 func build(rnd_seed):
 	cleanup()
 	rnd.seed = rnd_seed
 	noise.seed = rnd_seed
-	for k in axiom:
-		for l in axiom:
-			if k == l:
-				continue
-			k.neighbors.push_back(l)
-		k.axiom = true
-		vertices.push_back(k)
+	for k in range(axiom.size()):
+		var cur = k
+		var next = (k + 1) % axiom.size()
+		if !axiom[cur] in axiom[next].neighbors:
+			axiom[next].neighbors.push_back(axiom[cur])
+		if !axiom[next] in axiom[cur].neighbors:
+			axiom[cur].neighbors.push_back(axiom[next])
+		axiom[cur].axiom = true
+		vertices.push_back(axiom[k])
 	for k in vertices:
 		if minpos.x > k.pos.x:
 			minpos.x = k.pos.x
@@ -677,39 +808,39 @@ func get_height(x, y):
 
 const sidewalk_width = 1.5
 #var potential_edges = []
-func implode_road():
-#	for t in range(0, db._triangles.size(), 3):
-		
-#	potential_edges.clear()
-	for v in vertices:
-		for n in v._neighbors:
-			var p1 = v.pos
-			var p2 = vertices[n].pos
-			var dir = (p2 - p1).normalized()
-			var t = dir.tangent()
-			for offset in [-road_width - sidewalk_width,
-					-road_width,
-					road_width, 
-					road_width + sidewalk_width]:
-				var ep1 = p1 + offset
-				var ep2 = p2 + offset
-				for p in [ep1, ep2]:
-					if !p in extra_points && !p in points:
-						extra_points.push_back(p)
-					if !p in road_points:
-						road_points.push_back(p)
-			for offset in [-road_width - sidewalk_width - 0.1,
-					road_width + sidewalk_width + 0.1]:
-				var ep1 = p1 + offset
-				var ep2 = p2 + offset
-				for p in [ep1, ep2]:
-					if !p in extra_points && !p in points:
-						extra_points.push_back(p)
-
-			if !p1 in road_points:
-				road_points.push_back(p1)
-			if !p2 in road_points:
-				road_points.push_back(p2)
+#func implode_road():
+##	for t in range(0, db._triangles.size(), 3):
+#
+##	potential_edges.clear()
+#	for v in vertices:
+#		for n in v._neighbors:
+#			var p1 = v.pos
+#			var p2 = vertices[n].pos
+#			var dir = (p2 - p1).normalized()
+#			var t = dir.tangent()
+#			for offset in [-road_width - sidewalk_width,
+#					-road_width,
+#					road_width, 
+#					road_width + sidewalk_width]:
+#				var ep1 = p1 + offset
+#				var ep2 = p2 + offset
+#				for p in [ep1, ep2]:
+#					if !p in extra_points && !p in points:
+#						extra_points.push_back(p)
+#					if !p in road_points:
+#						road_points.push_back(p)
+#			for offset in [-road_width - sidewalk_width - 0.1,
+#					road_width + sidewalk_width + 0.1]:
+#				var ep1 = p1 + offset
+#				var ep2 = p2 + offset
+#				for p in [ep1, ep2]:
+#					if !p in extra_points && !p in points:
+#						extra_points.push_back(p)
+#
+#			if !p1 in road_points:
+#				road_points.push_back(p1)
+#			if !p2 in road_points:
+#				road_points.push_back(p2)
 #			potential_edges.push_back([p1, ep1])
 #			potential_edges.push_back([p1, ep2])
 #			potential_edges.push_back([p2, ep3])
@@ -738,126 +869,126 @@ func implode_road():
 	
 
 
-func build_simple_mesh():
-	var arrays = []
-	var verts = PoolVector3Array()
-	var normals = PoolVector3Array()
-	arrays.resize(ArrayMesh.ARRAY_MAX)
-	var mesh = ArrayMesh.new()
-	for p in polygons:
-		for v in p.vertices:
-			var v3d = Vector3()
-			v3d.x = v.x - float(map_width) / 2.0
-			v3d.z = v.x - float(map_height) / 2.0
-			v3d.y = 0
-			verts.push_back(v3d)
-			normals.push_back(Vector3(1, 1, 1))
-	arrays[ArrayMesh.ARRAY_VERTEX] = verts
-	arrays[ArrayMesh.ARRAY_NORMAL] = normals
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	return mesh
+#func build_simple_mesh():
+#	var arrays = []
+#	var verts = PoolVector3Array()
+#	var normals = PoolVector3Array()
+#	arrays.resize(ArrayMesh.ARRAY_MAX)
+#	var mesh = ArrayMesh.new()
+#	for p in polygons:
+#		for v in p.vertices:
+#			var v3d = Vector3()
+#			v3d.x = v.x - float(map_width) / 2.0
+#			v3d.z = v.x - float(map_height) / 2.0
+#			v3d.y = 0
+#			verts.push_back(v3d)
+#			normals.push_back(Vector3(1, 1, 1))
+#	arrays[ArrayMesh.ARRAY_VERTEX] = verts
+#	arrays[ArrayMesh.ARRAY_NORMAL] = normals
+#	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+#	return mesh
 
-func build_d_mesh():
-	var arrays = []
-	var verts = PoolVector3Array()
-	var normals = PoolVector3Array()
-	var indices = PoolIntArray(Geometry.triangulate_delaunay_2d(points))
-	arrays.resize(ArrayMesh.ARRAY_MAX)
-	var mesh = ArrayMesh.new()
-	for v in points:
-		var v3d = Vector3()
-		v3d.x = v.x - float(map_width) / 2.0
-		v3d.z = v.x - float(map_height) / 2.0
-		v3d.y = 0
-		verts.push_back(v3d)
-		normals.push_back(Vector3(1, 1, 1))
-	arrays[ArrayMesh.ARRAY_VERTEX] = verts
-	arrays[ArrayMesh.ARRAY_NORMAL] = normals
-	arrays[ArrayMesh.ARRAY_INDEX] = indices
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	return mesh
+#func build_d_mesh():
+#	var arrays = []
+#	var verts = PoolVector3Array()
+#	var normals = PoolVector3Array()
+#	var indices = PoolIntArray(Geometry.triangulate_delaunay_2d(points))
+#	arrays.resize(ArrayMesh.ARRAY_MAX)
+#	var mesh = ArrayMesh.new()
+#	for v in points:
+#		var v3d = Vector3()
+#		v3d.x = v.x - float(map_width) / 2.0
+#		v3d.z = v.x - float(map_height) / 2.0
+#		v3d.y = 0
+#		verts.push_back(v3d)
+#		normals.push_back(Vector3(1, 1, 1))
+#	arrays[ArrayMesh.ARRAY_VERTEX] = verts
+#	arrays[ArrayMesh.ARRAY_NORMAL] = normals
+#	arrays[ArrayMesh.ARRAY_INDEX] = indices
+#	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+#	return mesh
 			
 
-func build_mesh(aabb: AABB, vn: Node):
-	var polylist = []
-	var mesh_aabb = AABB()
-	var rect = Rect2(aabb.position.x + map_width / 2.0,
-		aabb.position.z + map_width / 2.0, aabb.size.x, aabb.size.z)
-	for p in polygons:
-		for v in p.vertices:
-#			print(v)
-			if rect.has_point(v) || true:
-				polylist.push_back(p)
-				break
-	var verts_road = PoolVector3Array()
-	var indices_road = PoolIntArray()
-	var normals_road = PoolVector3Array()
-	var verts_lot = PoolVector3Array()
-	var indices_lot = PoolIntArray()
-	var normals_lot = PoolVector3Array()
-	var mesh = ArrayMesh.new()
-	var arrays_roads = []
-	var arrays_lots = []
-	arrays_roads.resize(ArrayMesh.ARRAY_MAX)
-	arrays_lots.resize(ArrayMesh.ARRAY_MAX)
-	var idx_road = 0
-	var idx_lot = 0
-	for p in polylist:
-		var vid = 0
-		for v in p.vertices:
-#				var v = p.vertices[e.indices[0]]
-				var v3d = Vector3()
-				v3d.x = v.x - float(map_width) / 2.0
-				v3d.z = v.x - float(map_height) / 2.0
-				v3d.y = get_height(v3d.x, v3d.z)
-				v3d.y = 0
-				v3d *= 0.005
-				mesh_aabb = mesh_aabb.expand(v3d)
-				if p.road:
-					verts_road.push_back(v3d)
-					normals_road.push_back(Vector3(0, 1, 0))
-					indices_road.push_back(idx_road + vid)
-				else:
-					verts_lot.push_back(v3d)
-					normals_lot.push_back(Vector3(0, 1, 0))
-					indices_lot.push_back(idx_lot + vid)
-				vid += 1
-		if p.road:
-			idx_road += 3
-		else:
-			idx_lot += 3
-	print(verts_lot.size())
-	print(verts_lot)
-#	print(indices_lot)
-#	print(mesh_aabb)
-	arrays_roads[ArrayMesh.ARRAY_VERTEX] = verts_road
-#	arrays_roads[ArrayMesh.ARRAY_NORMAL] = normals_road
-#	arrays_roads[ArrayMesh.ARRAY_INDEX] = indices_road
-	arrays_lots[ArrayMesh.ARRAY_VERTEX] = verts_lot
-#	arrays_lots[ArrayMesh.ARRAY_NORMAL] = normals_lot
-#	arrays_lots[ArrayMesh.ARRAY_INDEX] = indices_lot
+#func build_mesh(aabb: AABB, vn: Node):
+#	var polylist = []
+#	var mesh_aabb = AABB()
+#	var rect = Rect2(aabb.position.x + map_width / 2.0,
+#		aabb.position.z + map_width / 2.0, aabb.size.x, aabb.size.z)
+#	for p in polygons:
+#		for v in p.vertices:
+##			print(v)
+#			if rect.has_point(v) || true:
+#				polylist.push_back(p)
+#				break
+#	var verts_road = PoolVector3Array()
+#	var indices_road = PoolIntArray()
+#	var normals_road = PoolVector3Array()
+#	var verts_lot = PoolVector3Array()
+#	var indices_lot = PoolIntArray()
+#	var normals_lot = PoolVector3Array()
+#	var mesh = ArrayMesh.new()
+#	var arrays_roads = []
+#	var arrays_lots = []
+#	arrays_roads.resize(ArrayMesh.ARRAY_MAX)
+#	arrays_lots.resize(ArrayMesh.ARRAY_MAX)
+#	var idx_road = 0
+#	var idx_lot = 0
+#	for p in polylist:
+#		var vid = 0
+#		for v in p.vertices:
+##				var v = p.vertices[e.indices[0]]
+#				var v3d = Vector3()
+#				v3d.x = v.x - float(map_width) / 2.0
+#				v3d.z = v.x - float(map_height) / 2.0
+#				v3d.y = get_height(v3d.x, v3d.z)
+#				v3d.y = 0
+#				v3d *= 0.005
+#				mesh_aabb = mesh_aabb.expand(v3d)
+#				if p.road:
+#					verts_road.push_back(v3d)
+#					normals_road.push_back(Vector3(0, 1, 0))
+#					indices_road.push_back(idx_road + vid)
+#				else:
+#					verts_lot.push_back(v3d)
+#					normals_lot.push_back(Vector3(0, 1, 0))
+#					indices_lot.push_back(idx_lot + vid)
+#				vid += 1
+#		if p.road:
+#			idx_road += 3
+#		else:
+#			idx_lot += 3
+#	print(verts_lot.size())
 #	print(verts_lot)
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays_roads)
-#	arrays_lots[ArrayMesh.ARRAY_VERTEX] = PoolVector3Array([Vector3(-1, -1, -1), Vector3(0, 0, 0), Vector3(0, 0, 1)])
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays_lots)
-#	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, PlaneMesh.new().get_mesh_arrays())
-	var mat = SpatialMaterial.new()
-	mat.params_cull_mode = SpatialMaterial.CULL_DISABLED
-	mesh.surface_set_material(0, mat)
-	mesh.surface_set_material(1, mat)
-	mesh.custom_aabb = mesh_aabb
-	var mi = MeshInstance.new()
-	vn.add_child(mi)
-	mi.mesh = mesh
-	
-	return mesh
+##	print(indices_lot)
+##	print(mesh_aabb)
+#	arrays_roads[ArrayMesh.ARRAY_VERTEX] = verts_road
+##	arrays_roads[ArrayMesh.ARRAY_NORMAL] = normals_road
+##	arrays_roads[ArrayMesh.ARRAY_INDEX] = indices_road
+#	arrays_lots[ArrayMesh.ARRAY_VERTEX] = verts_lot
+##	arrays_lots[ArrayMesh.ARRAY_NORMAL] = normals_lot
+##	arrays_lots[ArrayMesh.ARRAY_INDEX] = indices_lot
+##	print(verts_lot)
+#	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays_roads)
+##	arrays_lots[ArrayMesh.ARRAY_VERTEX] = PoolVector3Array([Vector3(-1, -1, -1), Vector3(0, 0, 0), Vector3(0, 0, 1)])
+#	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays_lots)
+##	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, PlaneMesh.new().get_mesh_arrays())
+#	var mat = SpatialMaterial.new()
+#	mat.params_cull_mode = SpatialMaterial.CULL_DISABLED
+#	mesh.surface_set_material(0, mat)
+#	mesh.surface_set_material(1, mat)
+#	mesh.custom_aabb = mesh_aabb
+#	var mi = MeshInstance.new()
+#	vn.add_child(mi)
+#	mi.mesh = mesh
+#
+#	return mesh
 
 func _ready():
 	set_process(false)
 	rules.grid = GridRule.new()
 	rnd = RandomNumberGenerator.new()
 	noise = OpenSimplexNoise.new()
-	db = PointDB.new()
+#	db = PointDB.new()
 
 func inset_point(v: Dictionary, n:Dictionary, new_pos: Vector2):
 	var nv = new_vertex(new_pos.x, new_pos.y)
@@ -1009,36 +1140,40 @@ func _process(delta):
 					print("vertex num: ", vertices.size())
 		STATE_EDGES1:
 			print_debug("iteration finished")
-			var ax_verts = []
-			for k in vertices:
-				if k.has("axiom") && k.axiom == true:
-					for l in vertices:
-						if l == k:
-							continue
-						if k in l.neighbors:
-							l.neighbors.erase(k)
-					ax_verts.push_back(k)
-			for v in ax_verts:
-				vertices.erase(v)
-			print_debug("cleanup finished")
+#			var ax_verts = []
+#			for k in vertices:
+#				if k.has("axiom") && k.axiom == true:
+#					for l in vertices:
+#						if l == k:
+#							continue
+#						if k in l.neighbors:
+#							l.neighbors.erase(k)
+#					ax_verts.push_back(k)
+#			for v in ax_verts:
+#				vertices.erase(v)
+#			print_debug("cleanup finished")
 			convert_vertices()
 			print_debug("conversion finished")
 			state = STATE_EDGES2
 		STATE_EDGES2:
-			points = []
-			for k in vertices:
-				points.push_back(k.pos)
-			db = PointDB.new()
-			db.build_grid(points, 64)
-			print_debug("points: ", points.size())
-			assert points.size() == db._points.size()
-			for v in vertices:
-				assert db._pos2id.has(v.pos)
-			for v in vertices:
-				for n in v.neighbors:
-					assert db._pos2id.has(n.pos)
-			print_debug("data tests passed")
-			print(points.size(), " ", db._points.size())
+			for v in range(vertices.size()):
+				var vdata = VertexData.new(roadmap.vertices[v], roadmap.road_width, roadmap.sidewalk_width)
+				vertices[v]._vdata = vdata
+				vertices[v]._points = vdata.get_all_road_points(vertices)
+#			points = []
+#			for k in vertices:
+#				points.push_back(k.pos)
+#			db = PointDB.new()
+#			db.build_grid(points, 64)
+#			print_debug("points: ", points.size())
+#			assert points.size() == db._points.size()
+#			for v in vertices:
+#				assert db._pos2id.has(v.pos)
+#			for v in vertices:
+#				for n in v.neighbors:
+#					assert db._pos2id.has(n.pos)
+#			print_debug("data tests passed")
+#			print(points.size(), " ", db._points.size())
 				
 #			for e in range(vertices.size()):
 #				for h in vertices[e]._neighbors:
@@ -1046,6 +1181,15 @@ func _process(delta):
 #			print_debug("edges added")
 			state = STATE_EDGES3
 		STATE_EDGES3:
+			for v in range(vertices.size()):
+				for entry in range(vertices[v]._points.size()):
+					var points = vertices[v]._points[entry].points_total
+					var points_3d = []
+					for p in points:
+						var p3d = Vector3(p.x - map_width * 0.5, get_height(p.x - map_width * 0.5, p.y - map_height * 0.5), p.y - map_height * 0.5)
+						points_3d.push_back(p3d)
+					vertices[v]._points[entry].points3d = points_3d
+					
 #			implode_road()
 #			print(points.size(), " ", extra_points.size())
 #			adjust_triangles()
@@ -1056,23 +1200,23 @@ func _process(delta):
 #			db.build_grid(points,64)
 #			print_debug("edges3")
 #
-			var bad_edges = []
-			for v in vertices:
-				for n in v.neighbors:
-#					print(points.size(), " ", db._points.size())
-					assert points.size() == db._points.size()
-					assert v.pos in points
-					assert n.pos in points
-					assert v.pos in db._points
-					assert n.pos in db._points
-					if !db.add_edge_data(v.pos, n.pos, {"road": true}):
-						bad_edges.push_back([v._index, n._index])
-			if bad_edges.size() > 0:
-				print("bad edges: ", bad_edges, " ", bad_edges.size())
-			for pe in extra_points:
-				var e = db.get_point_edges(pe)
-				for d in e:
-					db.add_edge_data(d[0], d[1], {"road": true})
+#			var bad_edges = []
+#			for v in vertices:
+#				for n in v.neighbors:
+##					print(points.size(), " ", db._points.size())
+#					assert points.size() == db._points.size()
+#					assert v.pos in points
+#					assert n.pos in points
+#					assert v.pos in db._points
+#					assert n.pos in db._points
+#					if !db.add_edge_data(v.pos, n.pos, {"road": true}):
+#						bad_edges.push_back([v._index, n._index])
+#			if bad_edges.size() > 0:
+#				print("bad edges: ", bad_edges, " ", bad_edges.size())
+#			for pe in extra_points:
+#				var e = db.get_point_edges(pe)
+#				for d in e:
+#					db.add_edge_data(d[0], d[1], {"road": true})
 #				for e in bad_edges:
 #						var p1: Vector2 = vertices[e[0]].pos
 #						var p2: Vector2 = vertices[e[1]].pos
@@ -1113,6 +1257,9 @@ func _process(delta):
 #				print("bad triangles")
 #			print(triangulation)
 		STATE_POLYGONS1:
+			lots = Lots.new()
+			lots.generate_lots(vertices, road_width, sidewalk_width, map_width, map_height)
+#			db = LotsDB.new(vertices, road_width, sidewalk_width)
 #			polygon_queue = db.get_polygons()
 #			for r in range(polygon_queue.size()):
 #				if polygon_queue[r].size() == 6:

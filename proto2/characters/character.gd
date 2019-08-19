@@ -127,6 +127,15 @@ var raycasts : = {
 	"left": {},
 	"right": {}
 }
+func is_overshooting():
+	if _path.size() < 2:
+		return false
+	var p = _path[0]
+	var facing = -global_transform.basis[2]
+	var dir = (_path[0] - global_transform.origin).normalized()
+	if facing.dot(dir) <= 0:
+		return true
+	return false
 func _physics_process(delta):
 	var space := get_world().direct_space_state
 	var ray_origin : = global_transform.origin + Vector3(0.0, 0.5, 1.0)
@@ -183,7 +192,7 @@ func _physics_process(delta):
 		orientation *= controls.frame_tf
 		controls.frame_tf = Transform()
 	if _path && _path.size() > 0:
-		while _path.size() > 0 && _path[0].distance_to(global_transform.origin) < 0.5:
+		while (_path.size() > 0 && _path[0].distance_to(global_transform.origin) < 0.5) || is_overshooting():
 			_path.pop_front()
 		if _path.size() > 0:
 			var next: Vector3 = _path[0]
