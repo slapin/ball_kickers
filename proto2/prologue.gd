@@ -132,6 +132,27 @@ func _process(delta):
 			for e in narration:
 				notifications.narration_notification(e)
 				_state = STATE_IDLE
+		STATE_IDLE:
+			var trig: int = randi() % 2
+			if Input.is_action_just_pressed("move_east") && trig == 1:
+				if $progress.value < 100:
+					$progress.value += (2 + randi() % 4)
+			if Input.is_action_just_pressed("move_west") && trig == 0:
+				if $progress.value < 100:
+					$progress.value += (2 + randi() % 4)
+			if randf() > 0.9:
+				if $progress.value > 0:
+					$progress.value -= (1 + randi() % 2)
+			if $progress.value >= 99:
+				_state = STATE_KICK_TRUNK
+		STATE_KICK_TRUNK:
+			if $vehicle_camera.global_transform.origin.distance_to($car1.global_transform.origin) < 5.0:
+				$car1/trunk_cover.rotation.x = lerp($car1/trunk_cover.rotation.x, PI / 4.0, delta * 0.3)
+				if abs($car1/trunk_cover.rotation.x - PI/4.0) < 0.1:
+					_state = STATE_FINISH
+		STATE_FINISH:
+			var sc = load("res://ui/act1_start.tscn")
+			get_tree().change_scene_to(sc)
 var grass = [
 	load("res://elements/forest/grass_1.mesh"),
 	load("res://elements/forest/grass_2.mesh"),
@@ -202,10 +223,15 @@ func _physics_process(delta):
 	var car_ll = $car1.linear_velocity
 	car_ll.y = 0
 	var car_speed = car_ll.length()
-	if car_speed > 50.0:
-		$car1.engine_force *= (1.0 - delta * 0.2)
-	if car_speed <= 30.0:
-		if $car1.engine_force > 4000.0:
-			$car1.engine_force *= (1.0 + delta * 0.2)
-		else:
-			$car1.engine_force = 4000.0
+	if _state != STATE_KICK_TRUNK:
+		if car_speed > 50.0:
+			$car1.engine_force *= (1.0 - delta * 0.2)
+		if car_speed <= 30.0:
+			if $car1.engine_force > 4000.0:
+				$car1.engine_force *= (1.0 + delta * 0.2)
+			else:
+				$car1.engine_force = 4000.0
+	else:
+			$car1.engine_force = (1.0 - delta * 0.2)
+			if car_speed < 10:
+				$car1.brake = 4000.0

@@ -1,8 +1,9 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://prologue.gd" type="Script" id=1]
 [ext_resource path="res://vehicles/vehicle_camera.gd" type="Script" id=2]
 [ext_resource path="res://vehicles/cars/car_car1.tscn" type="PackedScene" id=3]
+[ext_resource path="res://fonts/DroidSansFallback.ttf" type="DynamicFontData" id=4]
 
 [sub_resource type="ProceduralSky" id=7]
 sky_energy = 0.7
@@ -36,6 +37,18 @@ material = SubResource( 9 )
 size = Vector2( 100, 300 )
 subdivide_width = 200
 subdivide_depth = 200
+
+[sub_resource type="StyleBoxFlat" id=11]
+bg_color = Color( 1, 0, 0, 1 )
+border_blend = true
+
+[sub_resource type="StyleBoxFlat" id=12]
+bg_color = Color( 0.6, 0.6, 0.6, 0 )
+
+[sub_resource type="DynamicFont" id=13]
+use_mipmaps = true
+use_filter = true
+font_data = ExtResource( 4 )
 
 [node name="prologue" type="Spatial"]
 script = ExtResource( 1 )
@@ -88,3 +101,24 @@ material/0 = null
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 54, 0, 0 )
 mesh = SubResource( 10 )
 material/0 = null
+
+[node name="progress" type="ProgressBar" parent="."]
+anchor_left = -0.00411183
+anchor_top = 1.00702
+anchor_right = 0.995888
+anchor_bottom = 1.00702
+margin_left = 8.42108
+margin_top = -72.9475
+margin_right = 8.42114
+margin_bottom = -8.94751
+rect_min_size = Vector2( 64, 64 )
+size_flags_horizontal = 3
+size_flags_vertical = 1
+custom_styles/fg = SubResource( 11 )
+custom_styles/bg = SubResource( 12 )
+custom_fonts/font = SubResource( 13 )
+custom_colors/font_color = Color( 0, 0, 0, 0 )
+custom_colors/font_color_shadow = Color( 0.564706, 0.109804, 0.109804, 0.384314 )
+__meta__ = {
+"_edit_use_anchors_": true
+}
