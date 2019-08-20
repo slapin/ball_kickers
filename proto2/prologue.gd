@@ -51,10 +51,10 @@ var car_bottom_mat: SpatialMaterial
 func _ready():
 	notifications.set_main(self)
 	roadmap.connect("complete", self, "start")
-	$"car1/back-left-03".use_as_traction = true
-	$"car1/back-right-03".use_as_traction = true
-	$"car1/front-left-03".use_as_steering = true
-	$"car1/front-right-03".use_as_steering = true
+	$"car1/back-left-3".use_as_traction = true
+	$"car1/back-right-3".use_as_traction = true
+	$"car1/front-left-3".use_as_steering = true
+	$"car1/front-right-3".use_as_steering = true
 	$car1.steering = 0.0
 	$car1.engine_force = 10000.0
 	$Area.connect("body_entered", self, "area_enter")
@@ -106,7 +106,7 @@ func _ready():
 	$"car1/car1-2500".set_surface_material(0, car_mat)
 	$"car1/front-door-left".set_surface_material(0, car_mat)
 	$"car1/front-door-right".set_surface_material(0, car_mat)
-	$"car1/trunk_cover".set_surface_material(0, car_mat)
+	$"car1/trunk_rotate/trunk_cover".set_surface_material(0, car_mat)
 	$"car1/floor".set_surface_material(0, car_bottom_mat)
 
 var narration = [
@@ -147,8 +147,8 @@ func _process(delta):
 				_state = STATE_KICK_TRUNK
 		STATE_KICK_TRUNK:
 			if $vehicle_camera.global_transform.origin.distance_to($car1.global_transform.origin) < 5.0:
-				$car1/trunk_cover.rotation.x = lerp($car1/trunk_cover.rotation.x, PI / 4.0, delta * 0.3)
-				if abs($car1/trunk_cover.rotation.x - PI/4.0) < 0.1:
+				$car1/trunk_rotate.rotation.x = lerp($car1/trunk_rotate.rotation.x, PI / 6.0, delta * 0.3)
+				if abs($car1/trunk_rotate.rotation.x - PI/6.0) < 0.1:
 					_state = STATE_FINISH
 		STATE_FINISH:
 			var sc = load("res://ui/act1_start.tscn")
