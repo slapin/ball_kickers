@@ -1,0 +1,5 @@
+{
+	"object_types": ["GEOMETRY"],
+	"outpath": "elements",
+	"use_export_material": false
+}
