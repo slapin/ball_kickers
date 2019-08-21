@@ -87,7 +87,7 @@ static func pad_morphs(morphs: Dictionary, nshapes: Dictionary, min_point: Vecto
 				for v in range(morphs[mesh][m][t].size()):
 	#				print(morphs[m][t][v])
 					for s in range(morphs[mesh][m][t][v].shape.size()):
-						for u in range(2):
+						for u in range(3):
 							var cd : float = max_point[u] - min_point[u]
 							var ncd : float = max_normal[u] - min_normal[u]
 							var d = morphs[mesh][m][t][v].shape[s][u]
@@ -213,7 +213,57 @@ static func process_morph_meshes(mesh: ArrayMesh, morphs: Dictionary, rects: Dic
 		morphs[sc] += triangles
 		mesh_data[sc] += shape_names
 		nshapes[sc] = bshapes.size()
-			
+
+var mesh_queue = []
+static func _process_morph_meshes(mesh: ArrayMesh) -> Dictionary:
+	var ret = {}
+	for sc in range(mesh.get_surface_count()):
+		var bshapes: Array = mesh.surface_get_blend_shape_arrays(sc)
+		var arrays: Array = mesh.surface_get_arrays(sc)
+		var shape_names : = get_shape_names(mesh)
+		ret[sc] = {}
+		ret[sc].rects = update_rects(arrays, bshapes)
+		var triangles : = update_triangles(arrays, bshapes)
+		ret[sc].morphs = triangles
+		ret[sc].mesh_data = shape_names
+		ret[sc].nshapes = bshapes.size()
+	return ret
+static func _pad_morphs(morphs: Dictionary, nshapes: Dictionary, min_point: Vector3, max_point: Vector3, min_normal: Vector3, max_normal: Vector3):
+	# mesh - scene id from common array
+	for mesh in morphs.keys():
+		for m in morphs[mesh].keys():
+			var ns = nshapes[mesh][m]
+			for t in range(morphs[mesh][m].size()):
+				for v in range(morphs[mesh][m][t].size()):
+	#				print(morphs[m][t][v])
+					for s in range(morphs[mesh][m][t][v].shape.size()):
+						for u in range(3):
+							var cd : float = max_point[u] - min_point[u]
+							var ncd : float = max_normal[u] - min_normal[u]
+							var d = morphs[mesh][m][t][v].shape[s][u]
+							morphs[mesh][m][t][v].shape[s][u] = (d - min_point[u]) / cd
+							var ew = morphs[mesh][m][t][v].shape[s][u] * cd + min_point[u]
+							assert abs(ew - d) < 0.001
+							morphs[mesh][m][t][v].normal[s][u] = (morphs[mesh][m][t][v].normal[s][u] - min_normal[u]) / ncd
+func build_queue():
+	var scene_data : = {}
+	for scene_no in range(common.size()):
+		var ch: Node = common[scene_no].instance()
+		var helper_data : = {}
+		for mesh_name in ["base", "robe_helper", "tights_helper", "skirt_helper"]:
+			helper_data[mesh_name] = {}
+			var mi: MeshInstance = find_mesh_name(ch, mesh_name)
+			var mesh: ArrayMesh = mi.mesh
+			var morph_list = get_shape_names(mesh)
+			var helper_shapes : = PoolStringArray()
+			for e in morph_list:
+				if !e in helper_shapes:
+					helper_shapes.push_back(e)
+			find_min_max(mesh)
+			helper_data[mesh_name].shape_list = helper_shapes
+			helper_data[mesh_name].morph_data = _process_morph_meshes(mesh)
+		scene_data[scene_no] = helper_data
+	
 func _ready():
 	var morphs = {}
 	var morphs_helper = {}
@@ -224,6 +274,7 @@ func _ready():
 	var rects_helper = {}
 	var nshapes_helper = {}
 	load_data()
+	build_queue()
 	var base_shapes : = PoolStringArray()
 	var file_shapes = {}
 	for mesh_no in range(common.size()):
@@ -263,26 +314,33 @@ func _ready():
 			rects[mesh_no] = {}
 		process_morph_meshes(mesh, morphs[mesh_no], rects[mesh_no], mesh_data[mesh_no], nshapes[mesh_no])
 	pad_morphs(morphs, nshapes, min_point, max_point, min_normal, max_normal)
-	for mesh_no  in range(common.size()):
-		var ch: Node = common[mesh_no].instance()
-#		var mi: MeshInstance = find_mesh_name(ch, "base")
-		var mi_robe: MeshInstance = find_mesh_name(ch, "robe_helper")
-		assert mi_robe != null
-		var mesh: ArrayMesh = mi_robe.mesh
-#		var mesh_skirt: ArrayMesh = mi_skirt.mesh
-		morphs_helper[mesh_no] = {}
-		rects_helper[mesh_no] = {}
-		mesh_data_helper[mesh_no] = {}
-		nshapes_helper[mesh_no] = {}
-		process_morph_meshes(mesh, morphs_helper[mesh_no], rects_helper[mesh_no], mesh_data_helper[mesh_no], nshapes_helper[mesh_no])
-	pad_morphs(morphs_helper, nshapes_helper, min_point, max_point, min_normal, max_normal)
-	# TODO: combine helpers here
 	var draw_data: Dictionary = {}
 	fill_draw_data(morphs, draw_data, mesh_data, nshapes, rects)
 	draw_data_list.push_back(draw_data)
-	var draw_data_helper: Dictionary = {}
-	fill_draw_data(morphs_helper, draw_data_helper, mesh_data_helper, nshapes_helper, rects_helper)
-	draw_data_list.push_back(draw_data_helper)
+	for helper_name in ["robe_helper", "tights_helper", "skirt_helper"]:
+		for mesh_no  in range(common.size()):
+			var ch: Node = common[mesh_no].instance()
+#			var mi: MeshInstance = find_mesh_name(ch, "base")
+			var mi_helper: MeshInstance = find_mesh_name(ch, helper_name)
+			assert mi_helper != null
+			var mesh: ArrayMesh = mi_helper.mesh
+#			var mesh_skirt: ArrayMesh = mi_skirt.mesh
+			morphs_helper[mesh_no] = {}
+			rects_helper[mesh_no] = {}
+			mesh_data_helper[mesh_no] = {}
+			nshapes_helper[mesh_no] = {}
+			process_morph_meshes(mesh, morphs_helper[mesh_no], rects_helper[mesh_no], mesh_data_helper[mesh_no], nshapes_helper[mesh_no])
+		pad_morphs(morphs_helper, nshapes_helper, min_point, max_point, min_normal, max_normal)
+		var helper_draw_data: Dictionary = {}
+		fill_draw_data(morphs_helper, helper_draw_data, mesh_data_helper, nshapes, rects_helper)
+		draw_data_list.push_back(helper_draw_data)
+	# TODO: combine helpers here
+#	var draw_data: Dictionary = {}
+#	fill_draw_data(morphs, draw_data, mesh_data, nshapes, rects)
+#	draw_data_list.push_back(draw_data)
+#	var draw_data_helper: Dictionary = {}
+#	fill_draw_data(morphs_helper, draw_data_helper, mesh_data_helper, nshapes_helper, rects_helper)
+#	draw_data_list.push_back(draw_data_helper)
 	print("data count: ", draw_data.keys(), " ", draw_data[0].keys())
 	$gen/drawable.triangles = draw_data[0][0].triangles
 	$gen/drawable.min_point = min_point
@@ -314,7 +372,7 @@ func save_viewport(shape_name: String, rect: Rect2):
 		maps[shape_name].rect = rect.grow(0.003)
 		maps[shape_name].image_size = image_size
 
-var helpers = ["", "robe_"]
+var helpers_prefix = ["", "robe_", "tights_", "skirt_"]
 func finish_map_gen():
 	print("generating same vert indices...")
 	find_same_verts()
@@ -341,6 +399,8 @@ func next_helper():
 	draw_delay = 1.0
 	helper += 1
 	$gen/drawable.normals = false
+	if helper >= helpers_prefix.size():
+		finish_map_gen()
 func setup_draw():
 	$gen/drawable.normals = !$gen/drawable.normals
 	if $gen/drawable.normals:
@@ -352,48 +412,24 @@ func setup_draw():
 	$gen/drawable.triangles = draw_data_list[helper][surface][shape].triangles
 	$gen/drawable.update()
 func _process(delta):
-	match(helper):
-		0:
-			if surface == draw_data_list[helper].size():
-				if exit_delay > 0:
-					exit_delay -= delta
-					print(exit_delay)
-				else:
-					next_helper()
-			elif shape == draw_data_list[helper][surface].size():
-				next_surface()
-			else:
-				$gen_maps/ProgressBar.value = 100.0 * shape / draw_data_list[helper][surface].size()
-				print("value ", $gen_maps/ProgressBar.value)
-				if draw_delay > 0:
-					draw_delay -= delta
-				else:
-					save_viewport(helpers[helper] + draw_data_list[helper][surface][shape].name, draw_data_list[helper][surface][shape].rect)
-					if $gen/drawable.normals:
-						shape += 1
-					draw_delay = 1.0
-					print("shape ", shape)
-					if shape < draw_data_list[helper][surface].size():
-						setup_draw()
-		1:
-			if surface == draw_data_list[helper].size():
-				if exit_delay > 0:
-					exit_delay -= delta
-					print(exit_delay)
-				else:
-					finish_map_gen()
-			elif shape == draw_data_list[helper][surface].size():
-				next_surface()
-			else:
-				$gen_maps/ProgressBar.value = 100.0 * shape / draw_data_list[helper][surface].size()
-				print("value ", $gen_maps/ProgressBar.value)
-				if draw_delay > 0:
-					draw_delay -= delta
-				else:
-					save_viewport(helpers[helper] + draw_data_list[helper][surface][shape].name, draw_data_list[helper][surface][shape].rect)
-					if $gen/drawable.normals:
-						shape += 1
-					draw_delay = 1.0
-					print("shape ", shape)
-					if shape < draw_data_list[helper][surface].size():
-						setup_draw()
+	if surface == draw_data_list[helper].size():
+		if exit_delay > 0:
+			exit_delay -= delta
+			print(exit_delay)
+		else:
+			next_helper()
+	elif shape == draw_data_list[helper][surface].size():
+		next_surface()
+	else:
+		$gen_maps/ProgressBar.value = 100.0 * shape / draw_data_list[helper][surface].size()
+		print("value ", $gen_maps/ProgressBar.value)
+		if draw_delay > 0:
+			draw_delay -= delta
+		else:
+			save_viewport(helpers_prefix[helper] + draw_data_list[helper][surface][shape].name, draw_data_list[helper][surface][shape].rect)
+			if $gen/drawable.normals:
+				shape += 1
+			draw_delay = 1.0
+			print("shape ", shape)
+			if shape < draw_data_list[helper][surface].size():
+				setup_draw()
