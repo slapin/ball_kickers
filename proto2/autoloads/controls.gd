@@ -105,15 +105,17 @@ func _unhandled_input(event):
 func _physics_process(delta):
 	if click2d_update:
 		print("click! 2")
-		var space := camera.get_world().direct_space_state
-		var ray_origin : = camera.project_ray_origin(click2d)
-		var ray_normal : = camera.project_ray_normal(click2d)
-		var result := space.intersect_ray(ray_origin, ray_origin + ray_normal * 120.0, [], 512, true, false)
-		print(result)
-		if result.has("position"):
-			click3d = result.position
-			click3d_update = true
-			print("click! 3")
-			emit_signal("user_click", click3d)
-		click2d_update = false
+		if camera:
+			var world : = camera.get_world()
+			var space := world.direct_space_state
+			var ray_origin : = camera.project_ray_origin(click2d)
+			var ray_normal : = camera.project_ray_normal(click2d)
+			var result := space.intersect_ray(ray_origin, ray_origin + ray_normal * 120.0, [], 512, true, false)
+			print(result)
+			if result.has("position"):
+				click3d = result.position
+				click3d_update = true
+				print("click! 3")
+				emit_signal("user_click", click3d)
+			click2d_update = false
 		
