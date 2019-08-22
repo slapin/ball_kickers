@@ -1,13 +1,10 @@
 extends Control
 
 const TEX_SIZE: int = 512
-var min_point = Vector3()
-var max_point = Vector3()
-var min_normal = Vector3()
-var max_normal = Vector3()
 var maps = {}
 var vert_indices = {}
 var draw_data_list : = []
+var dnatool: DNATool
 
 onready var characters = [load("res://characters/female_2018.escn"), load("res://characters/male_2018.escn")]
 
@@ -42,26 +39,6 @@ func find_same_verts():
 				if !ok:
 					vert_indices[chdata][v1] = [index1]
 
-func find_min_max(mesh: ArrayMesh):
-	min_point = mesh.surface_get_blend_shape_arrays(0)[0][ArrayMesh.ARRAY_VERTEX][0] - mesh.surface_get_arrays(0)[ArrayMesh.ARRAY_VERTEX][0]
-	max_point = mesh.surface_get_blend_shape_arrays(0)[0][ArrayMesh.ARRAY_VERTEX][0] - mesh.surface_get_arrays(0)[ArrayMesh.ARRAY_VERTEX][0]
-	for sc in range(mesh.get_surface_count()):
-		var bshapes: Array = mesh.surface_get_blend_shape_arrays(sc).duplicate(true)
-		var arrays: Array = mesh.surface_get_arrays(sc).duplicate(true)
-		for src in bshapes:
-			for index in range(arrays[ArrayMesh.ARRAY_VERTEX].size()):
-				var v: Vector3 = src[ArrayMesh.ARRAY_VERTEX][index] - arrays[ArrayMesh.ARRAY_VERTEX][index]
-				var n: Vector3 = src[ArrayMesh.ARRAY_NORMAL][index] - arrays[ArrayMesh.ARRAY_NORMAL][index]
-				for ipos in range(3):
-					if min_point[ipos] > v[ipos]:
-						min_point[ipos] = v[ipos] 
-					if max_point[ipos] < v[ipos]:
-						max_point[ipos] = v[ipos]
-					if min_normal[ipos] > n[ipos]:
-						min_normal[ipos] = n[ipos] 
-					if max_normal[ipos] < n[ipos]:
-						max_normal[ipos] = n[ipos]
-	print("min: ", min_point, "max: ", max_point)
 static func check_triangle(verts: Array) -> bool:
 	var uv1 = verts[0].uv
 	var uv2 = verts[1].uv
@@ -245,26 +222,28 @@ static func _pad_morphs(morphs: Dictionary, nshapes: Dictionary, min_point: Vect
 							var ew = morphs[mesh][m][t][v].shape[s][u] * cd + min_point[u]
 							assert abs(ew - d) < 0.001
 							morphs[mesh][m][t][v].normal[s][u] = (morphs[mesh][m][t][v].normal[s][u] - min_normal[u]) / ncd
-func build_queue():
-	var scene_data : = {}
-	for scene_no in range(common.size()):
-		var ch: Node = common[scene_no].instance()
-		var helper_data : = {}
-		for mesh_name in ["base", "robe_helper", "tights_helper", "skirt_helper"]:
-			helper_data[mesh_name] = {}
-			var mi: MeshInstance = find_mesh_name(ch, mesh_name)
-			var mesh: ArrayMesh = mi.mesh
-			var morph_list = get_shape_names(mesh)
-			var helper_shapes : = PoolStringArray()
-			for e in morph_list:
-				if !e in helper_shapes:
-					helper_shapes.push_back(e)
-			find_min_max(mesh)
-			helper_data[mesh_name].shape_list = helper_shapes
-			helper_data[mesh_name].morph_data = _process_morph_meshes(mesh)
-		scene_data[scene_no] = helper_data
+#func build_queue():
+#	var scene_data : = {}
+#	for scene_no in range(common.size()):
+#		var ch: Node = common[scene_no].instance()
+#		var helper_data : = {}
+#		for mesh_name in ["base", "robe_helper", "tights_helper", "skirt_helper"]:
+#			helper_data[mesh_name] = {}
+#			var mi: MeshInstance = find_mesh_name(ch, mesh_name)
+#			var mesh: ArrayMesh = mi.mesh
+#			var morph_list = get_shape_names(mesh)
+#			var helper_shapes : = PoolStringArray()
+#			for e in morph_list:
+#				if !e in helper_shapes:
+#					helper_shapes.push_back(e)
+#			dnatool.find_min_max(mesh)
+#			helper_data[mesh_name].shape_list = helper_shapes
+#			helper_data[mesh_name].morph_data = _process_morph_meshes(mesh)
+#		scene_data[scene_no] = helper_data
 	
 func _ready():
+	dnatool = DNATool.new()
+	$gen/drawable.connect("drawing_finished", self, "handle_drawing_finished", [$gen])
 	var morphs = {}
 	var morphs_helper = {}
 	var mesh_data = {}
@@ -274,7 +253,7 @@ func _ready():
 	var rects_helper = {}
 	var nshapes_helper = {}
 	load_data()
-	build_queue()
+#	build_queue()
 	var base_shapes : = PoolStringArray()
 	var file_shapes = {}
 	for mesh_no in range(common.size()):
@@ -306,14 +285,14 @@ func _ready():
 		var mesh: ArrayMesh = mi.mesh
 		if !mesh:
 			return
-		find_min_max(mesh)
+		dnatool.find_min_max(mesh)
 		if !morphs.has(mesh_no):
 			morphs[mesh_no] = {}
 			mesh_data[mesh_no] = {}
 			nshapes[mesh_no] = {}
 			rects[mesh_no] = {}
 		process_morph_meshes(mesh, morphs[mesh_no], rects[mesh_no], mesh_data[mesh_no], nshapes[mesh_no])
-	pad_morphs(morphs, nshapes, min_point, max_point, min_normal, max_normal)
+	pad_morphs(morphs, nshapes, dnatool.min_point, dnatool.max_point, dnatool.min_normal, dnatool.max_normal)
 	var draw_data: Dictionary = {}
 	fill_draw_data(morphs, draw_data, mesh_data, nshapes, rects)
 	draw_data_list.push_back(draw_data)
@@ -330,7 +309,7 @@ func _ready():
 			mesh_data_helper[mesh_no] = {}
 			nshapes_helper[mesh_no] = {}
 			process_morph_meshes(mesh, morphs_helper[mesh_no], rects_helper[mesh_no], mesh_data_helper[mesh_no], nshapes_helper[mesh_no])
-		pad_morphs(morphs_helper, nshapes_helper, min_point, max_point, min_normal, max_normal)
+		pad_morphs(morphs_helper, nshapes_helper, dnatool.min_point, dnatool.max_point, dnatool.min_normal, dnatool.max_normal)
 		var helper_draw_data: Dictionary = {}
 		fill_draw_data(morphs_helper, helper_draw_data, mesh_data_helper, nshapes, rects_helper)
 		draw_data_list.push_back(helper_draw_data)
@@ -343,8 +322,8 @@ func _ready():
 #	draw_data_list.push_back(draw_data_helper)
 	print("data count: ", draw_data.keys(), " ", draw_data[0].keys())
 	$gen/drawable.triangles = draw_data[0][0].triangles
-	$gen/drawable.min_point = min_point
-	$gen/drawable.max_point = max_point
+	$gen/drawable.min_point = dnatool.min_point
+	$gen/drawable.max_point = dnatool.max_point
 	$gen/drawable.normals = false
 #	print("done ", mesh.get_surface_count(), " ", mesh.get_blend_shape_count(), " ", min_point, " ", max_point, " added: ", ntriangles, " skipped: ", skipped)
 var helper : = 0
@@ -352,25 +331,28 @@ var surface : = 0
 var shape : = 0
 var exit_delay : = 3.0
 var draw_delay : = 2.0
-func save_viewport(shape_name: String, rect: Rect2):
-	var viewport: Viewport = $gen
-	var vtex : = viewport.get_texture()
-	var tex_img : = vtex.get_data()
-	var fn = ""
-	if !maps.has(shape_name):
-		maps[shape_name] = {}
-		maps[shape_name].width = tex_img.get_width()
-		maps[shape_name].height = tex_img.get_height()
-		maps[shape_name].format = tex_img.get_format()
-	var byte_data = tex_img.duplicate(true).get_data()
-	var image_size = byte_data.size()
-	if $gen/drawable.normals:
-		maps[shape_name].image_normal_data = byte_data.compress(File.COMPRESSION_FASTLZ)
-		maps[shape_name].image_normal_size = image_size
-	else:
-		maps[shape_name].image_data = byte_data.compress(File.COMPRESSION_FASTLZ)
-		maps[shape_name].rect = rect.grow(0.003)
-		maps[shape_name].image_size = image_size
+#func save_viewport(v: Viewport, maplist: Dictionary, shape_name: String, rect: Rect2, normals: bool):
+##	v.set_clear_mode(Viewport.CLEAR_MODE_ONLY_NEXT_FRAME)
+##	yield(get_tree(), "idle_frame")
+##	yield(get_tree(), "idle_frame")
+#	var viewport: Viewport = v
+#	var vtex : = viewport.get_texture()
+#	var tex_img : = vtex.get_data()
+#	var fn = ""
+#	if !maplist.has(shape_name):
+#		maplist[shape_name] = {}
+#		maplist[shape_name].width = tex_img.get_width()
+#		maplist[shape_name].height = tex_img.get_height()
+#		maplist[shape_name].format = tex_img.get_format()
+#	var byte_data = tex_img.duplicate(true).get_data()
+#	var image_size = byte_data.size()
+#	if normals:
+#		maplist[shape_name].image_normal_data = byte_data.compress(File.COMPRESSION_FASTLZ)
+#		maplist[shape_name].image_normal_size = image_size
+#	else:
+#		maplist[shape_name].image_data = byte_data.compress(File.COMPRESSION_FASTLZ)
+#		maplist[shape_name].rect = rect.grow(0.003)
+#		maplist[shape_name].image_size = image_size
 
 var helpers_prefix = ["", "robe_", "tights_", "skirt_"]
 func finish_map_gen():
@@ -378,13 +360,14 @@ func finish_map_gen():
 	find_same_verts()
 	var fd = File.new()
 	fd.open("res://characters/common/config.bin", File.WRITE)
-	fd.store_var(min_point)
-	fd.store_var(max_point)
-	fd.store_var(min_normal)
-	fd.store_var(max_normal)
+	fd.store_var(dnatool.min_point)
+	fd.store_var(dnatool.max_point)
+	fd.store_var(dnatool.min_normal)
+	fd.store_var(dnatool.max_normal)
 	fd.store_var(maps)
 	fd.store_var(vert_indices)
 	fd.close()
+	save_images()
 	get_tree().quit()
 #	get_tree().change_scene("res://map_test.tscn")
 func next_surface():
@@ -404,13 +387,46 @@ func next_helper():
 func setup_draw():
 	$gen/drawable.normals = !$gen/drawable.normals
 	if $gen/drawable.normals:
-		$gen/drawable.min_point = min_normal
-		$gen/drawable.max_point = max_normal
+		$gen/drawable.min_point = dnatool.min_normal
+		$gen/drawable.max_point = dnatool.max_normal
 	else:
-		$gen/drawable.min_point = min_point
-		$gen/drawable.max_point = max_point
+		$gen/drawable.min_point = dnatool.min_point
+		$gen/drawable.max_point = dnatool.max_point
 	$gen/drawable.triangles = draw_data_list[helper][surface][shape].triangles
 	$gen/drawable.update()
+
+func save_images():
+	for k in maps.keys():
+		for e in ["diffuse", "normal"]:
+			var fn = "res://characters/common/" + k + "_" + e + "_orig.png"
+			var data: PoolByteArray
+			var size: int
+			if e == "diffuse":
+				data = maps[k].image_data
+				size = maps[k].image_size
+			elif e == "normal":
+				data = maps[k].image_normal_data
+				size = maps[k].image_normal_size
+			var image_data = data.decompress(size, File.COMPRESSION_FASTLZ)
+			var img = Image.new()
+			img.create_from_data(maps[k].width, maps[k].height, false, maps[k].format, image_data)
+			print("saving ", fn)
+			img.save_png(fn)
+	var fd = File.new()
+	var outj = {}
+	outj.min_point = dnatool.min_point
+	outj.max_point = dnatool.max_point
+	outj.min_normal = dnatool.min_normal
+	outj.max_normal = dnatool.max_normal
+	outj.maps = maps
+	outj.vert_indices = vert_indices
+	fd.open("res://characters/common/debug-data-orig.json", File.WRITE)
+	fd.store_string(JSON.print(outj, "\t", true))
+	fd.close()
+
+func handle_drawing_finished(viewport):
+	print_debug("drawing finished")
+
 func _process(delta):
 	if surface == draw_data_list[helper].size():
 		if exit_delay > 0:
@@ -426,7 +442,8 @@ func _process(delta):
 		if draw_delay > 0:
 			draw_delay -= delta
 		else:
-			save_viewport(helpers_prefix[helper] + draw_data_list[helper][surface][shape].name, draw_data_list[helper][surface][shape].rect)
+			dnatool.save_viewport($gen, maps, helpers_prefix[helper] + draw_data_list[helper][surface][shape].name, draw_data_list[helper][surface][shape].rect, $gen/drawable.normals)
+#			save_viewport($gen, maps, helpers_prefix[helper] + draw_data_list[helper][surface][shape].name, draw_data_list[helper][surface][shape].rect, $gen/drawable.normals)
 			if $gen/drawable.normals:
 				shape += 1
 			draw_delay = 1.0

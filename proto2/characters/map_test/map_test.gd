@@ -147,11 +147,13 @@ func update_slider(value: float, control: String, slider: HSlider):
 	var modifier = ""
 	if value >= 0:
 		modifier = controls[control].plus
-		dna.set_modifier_value(controls[control].minus, 0.0)
+		if controls[control].has("minus"):
+			dna.set_modifier_value(controls[control].minus, 0.0)
 	else:
 		value = -value
 		modifier = controls[control].minus
-		dna.set_modifier_value(controls[control].plus, 0.0)
+		if controls[control].has("plus"):
+			dna.set_modifier_value(controls[control].plus, 0.0)
 	update_modifier(value, modifier)
 var ch: Node
 func rebuild_clothes_menu():
@@ -217,12 +219,12 @@ func _ready():
 var state : = 0
 func build_contols():
 	for k in dna.get_modifier_list():
-		if k.ends_with("_plus"):
+		if k.ends_with("_plus") && false:
 			var cname = k.replace("_plus", "")
 			if !controls.has(cname):
 				controls[cname] = {}
 			controls[cname].plus = k
-		elif k.ends_with("_minus"):
+		elif k.ends_with("_minus") && false:
 			var cname = k.replace("_minus", "")
 			if !controls.has(cname):
 				controls[cname] = {}
@@ -245,7 +247,8 @@ func build_contols():
 		var slider : = HSlider.new()
 		slider.rect_min_size = Vector2(180, 30)
 		print(controls[k])
-		if controls[k].plus && controls[k].minus:
+		
+		if controls[k].has("minus") && controls[k].has("plus"):
 			slider.min_value = -100
 			slider.max_value = 100
 		else:

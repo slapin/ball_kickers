@@ -123,7 +123,7 @@ func modify_mesh(orig_mesh: ArrayMesh, v_indices: Dictionary) -> ArrayMesh:
 				var offsetn: Color = maps[k].image_normal.get_pixelv(pos)
 				var pdiff: Vector3 = Vector3(offset.r, offset.g, offset.b)
 				var ndiff: Vector3 = Vector3(offsetn.r, offsetn.g, offsetn.b)
-				for u in range(2):
+				for u in range(3):
 					diff[u] = range_lerp(pdiff[u], 0.0, 1.0, min_point[u], max_point[u]) * maps[k].value
 					diffn[u] = range_lerp(ndiff[u], 0.0, 1.0, min_normal[u], max_normal[u]) * maps[k].value
 					if abs(diff[u]) < 0.0001:

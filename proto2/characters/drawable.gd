@@ -1,4 +1,5 @@
 extends ColorRect
+signal drawing_finished
 
 const TEX_SIZE = 512
 var triangles : Array = []
@@ -24,3 +25,6 @@ func _draw():
 				colors.push_back(Color(k.shape.x, k.shape.y, k.shape.z, 1))
 			uvs.push_back(k.uv * TEX_SIZE)
 		draw_polygon(PoolVector2Array(uvs), PoolColorArray(colors))
+	yield(get_tree(), "idle_frame")
+	yield(get_tree(), "idle_frame")
+	emit_signal("drawing_finished")
