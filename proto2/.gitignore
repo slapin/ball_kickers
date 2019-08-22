@@ -1,0 +1,5 @@
+characters/common/*.png*
+*.blend[12345689]*
+characters/common/debug-data-new.json
+characters/common/debug-data-orig.json
+exports/*
