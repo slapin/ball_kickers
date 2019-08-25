@@ -9,7 +9,7 @@ extends Control
 func start_game():
 	var sc = load("res://prologue.tscn")
 	world.init_data()
-	roadmap.build(444444)
+#	roadmap.build(444444)
 	get_tree().change_scene_to(sc)
 func load_game():
 	pass

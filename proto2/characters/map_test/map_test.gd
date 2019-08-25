@@ -185,7 +185,7 @@ func prepare_character(x: int) -> void:
 #	body_mesh = body_mi.mesh.duplicate(true)
 #	orig_body_mesh = body_mi.mesh.duplicate(true)
 	_vert_indices = dna.vert_indices[x]
-	dna.add_mesh("body", body_mi.mesh, dna.vert_indices[x])
+	dna.add_body_mesh(body_mi.mesh, dna.vert_indices[x])
 #	cloth_meshes.clear()
 	cloth_mis.clear()
 	for cloth in clothes.keys():

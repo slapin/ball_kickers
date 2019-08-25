@@ -6,7 +6,7 @@ var common_path = "characters/common"
 
 var dnatool: DNATool
 
-const TEX_SIZE: int = 512
+#const TEX_SIZE: int = 512
 
 var maps = {}
 var vert_indices = {}
@@ -57,25 +57,6 @@ func get_mesh(base: Node, mesh_name: String) -> ArrayMesh:
 			queue.push_back(c)
 	return mesh
 
-
-static func check_triangle(verts: Array, vs: Array, ns: Array) -> bool:
-	var uv1 = verts[0]
-	var uv2 = verts[1]
-	var uv3 = verts[2]
-	var v1 = uv1 - uv3
-	var v2 = uv1 - uv3
-	if v1.length() * TEX_SIZE < 1.2:
-		return false
-	if v2.length() * TEX_SIZE < 1.2:
-		return false
-	var sumdata = Vector3()
-	for k in vs + ns:
-		sumdata += k
-	if sumdata.length() < 0.001:
-		return false
-	return true
-
-
 func compress_points(v: PoolVector3Array, vmin: Vector3, vmax: Vector3) -> PoolVector3Array:
 	var cd = vmax - vmin
 	var ret: PoolVector3Array = PoolVector3Array(v)
@@ -85,67 +66,6 @@ func compress_points(v: PoolVector3Array, vmin: Vector3, vmax: Vector3) -> PoolV
 			ret[e][h] = (v[e][h] - vmin[h]) / cd[h]
 			assert ret[e][h] <= 1.0 && ret[e][h] >= 0.0
 	return ret
-func build_triangles(mesh: ArrayMesh, diffmap: Dictionary):
-	assert mesh
-	assert dnatool.max_point != dnatool.min_point
-	var cd = dnatool.max_point - dnatool.min_point
-	var ncd = dnatool.max_normal - dnatool.min_normal
-	for sc in range(mesh.get_surface_count()):
-		var shape_arrays = mesh.surface_get_blend_shape_arrays(sc)
-		var surf_arrays =  mesh.surface_get_arrays(sc)
-		for bshape in range(shape_arrays.size()):
-			var bs_name = mesh.get_blend_shape_name(bshape)
-			if !diffmap.has(bs_name):
-				diffmap[bs_name] = {}
-				diffmap[bs_name].base_v = []
-				diffmap[bs_name].shape_v = []
-				diffmap[bs_name].triangles = []
-				diffmap[bs_name].triangles_uv = []
-				diffmap[bs_name].triangles_v = []
-				diffmap[bs_name].triangles_n = []
-			for vid in range(0, surf_arrays[ArrayMesh.ARRAY_INDEX].size(), 3):
-				var p1_index = surf_arrays[ArrayMesh.ARRAY_INDEX][vid + 0]
-				var p2_index = surf_arrays[ArrayMesh.ARRAY_INDEX][vid + 1]
-				var p3_index = surf_arrays[ArrayMesh.ARRAY_INDEX][vid + 2]
-				var p1 = surf_arrays[ArrayMesh.ARRAY_TEX_UV][p1_index]
-				var p2 = surf_arrays[ArrayMesh.ARRAY_TEX_UV][p2_index]
-				var p3 = surf_arrays[ArrayMesh.ARRAY_TEX_UV][p3_index]
-				var base_v1 = surf_arrays[ArrayMesh.ARRAY_VERTEX][p1_index]
-				var base_v2 = surf_arrays[ArrayMesh.ARRAY_VERTEX][p2_index]
-				var base_v3 = surf_arrays[ArrayMesh.ARRAY_VERTEX][p3_index]
-				var shape_v1 = shape_arrays[bshape][ArrayMesh.ARRAY_VERTEX][p1_index]
-				var shape_v2 = shape_arrays[bshape][ArrayMesh.ARRAY_VERTEX][p2_index]
-				var shape_v3 = shape_arrays[bshape][ArrayMesh.ARRAY_VERTEX][p3_index]
-				var d1 = shape_v1 - base_v1
-				var d2 = shape_v2 - base_v2
-				var d3 = shape_v3 - base_v3
-				var base_n1 = surf_arrays[ArrayMesh.ARRAY_NORMAL][p1_index]
-				var base_n2 = surf_arrays[ArrayMesh.ARRAY_NORMAL][p2_index]
-				var base_n3 = surf_arrays[ArrayMesh.ARRAY_NORMAL][p3_index]
-				var shape_n1 = shape_arrays[bshape][ArrayMesh.ARRAY_NORMAL][p1_index]
-				var shape_n2 = shape_arrays[bshape][ArrayMesh.ARRAY_NORMAL][p2_index]
-				var shape_n3 = shape_arrays[bshape][ArrayMesh.ARRAY_NORMAL][p3_index]
-				var nd1 = shape_n1 - base_n1
-				var nd2 = shape_n2 - base_n2
-				var nd3 = shape_n3 - base_n3
-				var triangle = [p1_index, p2_index, p3_index]
-				var triangle_uv = [p1, p2, p3]
-#				var triangle_v = compress_points([d1, d2, d3], min_point, max_point)
-#				var triangle_n = compress_points([nd1, nd2, nd3], min_normal, max_normal)
-				var triangle_v = [d1, d2, d3]
-				var triangle_n = [nd1, nd2, nd3]
-				if check_triangle(triangle_uv, triangle_v, triangle_n):
-					diffmap[bs_name].triangles += triangle
-					diffmap[bs_name].base_v += [base_v1, base_v2, base_v3]
-					diffmap[bs_name].shape_v += [shape_v1, shape_v2, shape_v3]
-					diffmap[bs_name].triangles_uv += triangle_uv
-					diffmap[bs_name].triangles_v += triangle_v
-					diffmap[bs_name].triangles_n += triangle_n
-#			print_debug("surface: ", sc, " shape: ", bs_name, "/", bshape,
-#					" triangle: ", diffmap[bs_name].triangles_uv.size() / 3)
-
-func convert_triangles(base: Dictionary, helper: Dictionary):
-	pass
 
 enum {STATE_DRAW, STATE_CHECK, STATE_FINISH, STATE_IDLE}
 
@@ -176,9 +96,8 @@ func create_queue(diffmap: Dictionary):
 			data.triangles_v = diffmap[k][map_name].triangles_n
 			data.rect = diffmap[k][map_name].rect
 			draw_queue.push_back(data)
-#			for k in data.triangles_v:
-#				print(k.z)
 
+var uv_to_uv2: Dictionary
 func _ready():
 	dnatool = DNATool.new()
 	load_data()
@@ -198,14 +117,15 @@ func _ready():
 		if !diffmap.has(base_mesh):
 			diffmap[base_mesh] = {}
 		var mesh = get_mesh(obj, base_mesh)
-		build_triangles(mesh, diffmap[base_mesh])
+		uv_to_uv2 = dnatool.build_uv_to_uv2(mesh, 0)
+		dnatool.build_triangles(mesh, diffmap[base_mesh])
 		print("scene: ", c, "mesh: ", base_mesh, " done")
 		for mesh_name in helper_meshes:
 			var helper_mesh = get_mesh(obj, mesh_name)
 			if !diffmap.has(mesh_name):
 				diffmap[mesh_name] = {}
-			build_triangles(helper_mesh, diffmap[mesh_name])
-			convert_triangles(diffmap[base_mesh], diffmap[mesh_name])
+#			helper_mesh = dnatool.convert_triangles(mesh, helper_mesh)
+			dnatool.build_triangles(helper_mesh, diffmap[mesh_name])
 			print("scene: ", c, "mesh: ", mesh_name, " done")
 		print("scene: ", c, " done")
 	print("min: point: ", dnatool.min_point, " normal: ", dnatool.min_normal)
@@ -255,7 +175,7 @@ func draw_viewport():
 	default_color.r = range_lerp(0, _min_point.x, _max_point.x, 0.0, 1.0)
 	default_color.g = range_lerp(0, _min_point.y, _max_point.y, 0.0, 1.0)
 	default_color.b = range_lerp(0, _min_point.z, _max_point.z, 0.0, 1.0)
-	draw_obj.draw_rect(Rect2(0, 0, TEX_SIZE, TEX_SIZE), default_color, true)
+	draw_obj.draw_rect(Rect2(0, 0, dnatool.TEX_SIZE, dnatool.TEX_SIZE), default_color, true)
 	print("draw: ", item.triangles_uv.size())
 	for t in range(0, item.triangles_uv.size(), 3):
 		var colors = []
@@ -266,15 +186,12 @@ func draw_viewport():
 		var sum = p1 + p2 + p3
 		var midp = sum / 3.0
 		for k in range(3):
-#			print(k.shape)
-#			print(k.uv)
 			var v = item.triangles_v[t + k]
 			colors.push_back(Color(v.x, v.y, v.z, 1))
 			var uv = item.triangles_uv[t + k]
 			var pt = (uv - midp).normalized() * 3.5
-			uvs.push_back(uv * TEX_SIZE + pt)
+			uvs.push_back(uv * dnatool.TEX_SIZE + pt)
 		draw_obj.draw_polygon(PoolVector2Array(uvs), PoolColorArray(colors))
-#		print(colors)
 	yield(draw_obj.get_tree(), "idle_frame")
 	yield(draw_obj.get_tree(), "idle_frame")
 	yield(draw_obj.get_tree(), "idle_frame")
@@ -283,7 +200,7 @@ func draw_viewport():
 
 
 var _state = STATE_DRAW
-var draw_delay: float = 0.1
+var draw_delay: float = 0.01
 var save_pngs : = true
 func save_images():
 	for k in maps.keys():
@@ -302,17 +219,6 @@ func save_images():
 			img.create_from_data(maps[k].width, maps[k].height, false, maps[k].format, image_data)
 			print("saving ", fn)
 			img.save_png(fn)
-	var outj = {}
-	outj.min_point = dnatool.min_point
-	outj.max_point = dnatool.max_point
-	outj.min_normal = dnatool.min_normal
-	outj.max_normal = dnatool.max_normal
-	outj.maps = maps
-	outj.vert_indices = vert_indices
-	var fd = File.new()
-	fd.open("res://characters/common/debug-data-new.json", File.WRITE)
-	fd.store_string(JSON.print(outj, "\t", true))
-	fd.close()
 
 func draw_finished():
 	print("draw_finished")
@@ -353,6 +259,7 @@ func _process(delta):
 			fd.store_var(dnatool.max_normal)
 			fd.store_var(maps)
 			fd.store_var(vert_indices)
+			fd.store_var(uv_to_uv2)
 			fd.close()
 			if save_pngs:
 				save_images()
