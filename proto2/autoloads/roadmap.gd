@@ -24,9 +24,8 @@ var maxpos = Vector2()
 var vertex_queue = []
 var vertices = []
 var front = []
-var lots: Lots
+var lots : Lots
 var grid: GridData
-
 class Lots:
 	enum {LOT_FOREST, LOT_AIRPORT, LOT_PARK, LOT_CEMETERY, LOT_RESIDENTAL, LOT_INDUSTRIAL}
 	var lot_types = {
@@ -127,6 +126,7 @@ class Lots:
 				if Geometry.point_is_inside_triangle(p2, polygon[0], polygon[2], polygon[3]):
 					return true
 		return false
+	
 	func generate_lots(vertices, road_width, sidewalk_width, map_width, map_height):
 		for v in range(vertices.size()):
 			var p1 = vertices[v].pos
@@ -156,6 +156,8 @@ class Lots:
 						"type_name": lot_type_name
 					})
 					break
+			yield()
+		return true
 
 func get_point3d(v: Vector2):
 	var v3d : = Vector3()
@@ -1178,12 +1180,17 @@ class VertexData:
 			ret.push_back(get_wedge_road_points(wedge, vertices))
 		return ret
 
+var vertex_data_queue = []
+var lot_state
+
 func _process(delta):
+	if randf() < 0.8:
+		return
 	match(state):
 		STATE_INIT:
 			pass
 		STATE_ITERATION:
-			if randf() > 0.5:
+			if randf() > 0.8:
 				if front.size() > 0 || vertex_queue.size() > 0:
 					front = iteration(front)
 				else:
@@ -1206,11 +1213,16 @@ func _process(delta):
 			convert_vertices()
 			print_debug("conversion finished")
 			state = STATE_EDGES2
+			vertex_data_queue = range(vertices.size())
 		STATE_EDGES2:
-			for v in range(vertices.size()):
-				var vdata = VertexData.new(roadmap.vertices[v], roadmap.road_width, roadmap.sidewalk_width)
-				vertices[v]._vdata = vdata
-				vertices[v]._points = vdata.get_all_road_points(vertices)
+			if randf() > 0.8:
+				var count: int = 0
+				while vertex_data_queue.size() > 0 && count < 20:
+					var v = vertex_data_queue.pop_front()
+					var vdata = VertexData.new(vertices[v], road_width, sidewalk_width)
+					vertices[v]._vdata = vdata
+					vertices[v]._points = vdata.get_all_road_points(vertices)
+					count += 1
 #			points = []
 #			for k in vertices:
 #				points.push_back(k.pos)
@@ -1230,7 +1242,9 @@ func _process(delta):
 #				for h in vertices[e]._neighbors:
 #					add_edge(e, h, true)
 #			print_debug("edges added")
-			state = STATE_EDGES3
+			if vertex_data_queue.size() == 0:
+				state = STATE_EDGES3
+				print_debug("road points complete")
 		STATE_EDGES3:
 			for v in range(vertices.size()):
 				for entry in range(vertices[v]._points.size()):
@@ -1240,6 +1254,7 @@ func _process(delta):
 						var p3d = Vector3(p.x - map_width * 0.5, get_height(p.x - map_width * 0.5, p.y - map_height * 0.5), p.y - map_height * 0.5)
 						points_3d.push_back(p3d)
 					vertices[v]._points[entry].points3d = points_3d
+			print("points complete")
 					
 #			implode_road()
 #			print(points.size(), " ", extra_points.size())
@@ -1308,8 +1323,14 @@ func _process(delta):
 #				print("bad triangles")
 #			print(triangulation)
 		STATE_POLYGONS1:
-			lots = Lots.new()
-			lots.generate_lots(vertices, road_width, sidewalk_width, map_width, map_height)
+			if lot_state == null:
+				lots = Lots.new()
+				lot_state = lots.generate_lots(vertices, road_width, sidewalk_width, map_width, map_height)
+			elif lot_state is GDScriptFunctionState:
+				lot_state = lot_state.resume()
+			else:
+				state = STATE_POLYGONS2
+				print("polygons built")
 #			db = LotsDB.new(vertices, road_width, sidewalk_width)
 #			polygon_queue = db.get_polygons()
 #			for r in range(polygon_queue.size()):
@@ -1318,8 +1339,6 @@ func _process(delta):
 #			
 #			print("building polygons")
 #			build_polygons()
-			state = STATE_POLYGONS2
-			print("polygons built")
 		STATE_POLYGONS2:
 			grid = GridData.new()
 			for v in range(vertices.size()):
