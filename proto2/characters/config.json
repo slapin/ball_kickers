@@ -1,0 +1,195 @@
+{
+	"accessory_path": "res://characters/accessory.json",
+	"genders": [
+		{
+			"name": "male",
+			"scene": "res://characters/male_2018.tscn"
+		},
+		{
+			"name": "female",
+			"scene": "res://characters/female_2018.tscn"
+		}
+	],
+	"map_path": "res://characters/blendmaps.bin",
+	"slot_data": [
+		{
+			"category": "body",
+			"helper": "base",
+			"mandatory": true,
+			"match": "body*",
+			"name": "body"
+		},
+		{
+			"category": "hair",
+			"helper": "base",
+			"mandatory": true,
+			"match": "front_hair*",
+			"name": "front_hair"
+		},
+		{
+			"category": "hair",
+			"helper": "base",
+			"mandatory": true,
+			"match": "back_hair*",
+			"name": "back_hair"
+		},
+		{
+			"category": "eyebrows",
+			"helper": "base",
+			"mandatory": true,
+			"match": "eyebrows*",
+			"name": "eyebrows"
+		},
+		{
+			"category": "eyelashes",
+			"helper": "base",
+			"mandatory": true,
+			"match": "eyelashes*",
+			"name": "eyelashes"
+		},
+		{
+			"category": "eyes",
+			"helper": "base",
+			"mandatory": true,
+			"match": "eyes*",
+			"name": "eyes"
+		},
+		{
+			"category": "fingernails",
+			"helper": "base",
+			"mandatory": true,
+			"match": "fingernails*",
+			"name": "fingernails"
+		},
+		{
+			"category": "panties",
+			"helper": "base",
+			"mandatory": true,
+			"match": "panties*",
+			"name": "panties"
+		},
+		{
+			"category": "tears",
+			"helper": "base",
+			"mandatory": false,
+			"match": "tears*",
+			"name": "tears"
+		},
+		{
+			"category": "teeth",
+			"helper": "base",
+			"mandatory": true,
+			"match": "teeth*",
+			"name": "teeth"
+		},
+		{
+			"category": "toenail",
+			"helper": "base",
+			"mandatory": true,
+			"match": "toenail*",
+			"name": "toenail"
+		},
+		{
+			"category": "tongue",
+			"helper": "base",
+			"mandatory": true,
+			"match": "tongue*",
+			"name": "tongue"
+		},
+		{
+			"category": "top",
+			"helper": "base",
+			"mandatory": true,
+			"match": "top*",
+			"name": "top"
+		}
+	],
+	"bone-modifiers": {
+		"common": [
+			["bone", "head_scale", "head", {"uniform-scale": 1.3}],
+			["bone", "head_up", "head", {"translate":[0.0, 0.1, 0.0]}],
+			["bone", "height", "pelvis", {"uniform-scale": 1.2}]
+			["bone-group", "mouth-up",
+				["special01", "special04", "levator04_L", "levator04_R"],
+				[
+					{"translate": [0.0, -0.004, 0.0]},
+					{"translate": [0.0, 0.008, 0.0]},
+					{"translate": [0.016, -0.019, 0.0]},
+					{"translate": [-0.016, -0.019, 0.0]}
+				]
+			],
+			["bone-group", "eyebrows-up", [""temporalis01_L", "temporalis01_R"],
+				[
+					{"translate": [0.0, 0.015, 0.0]},
+					{"translate": [0.0, 0.015, 0.0]}
+				]
+			],
+			["bone-group", "eyebrows-rotate1", ["oculi02_L", "oculi02_R"],
+				[
+					{"rotate": [[0.0, 1.0, 0.0], -12.86]},
+					{"rotate": [[0.0, 1.0, 0.0], 12.86]}
+				]
+			],
+			["bone-group", "eyebrows-rotate2", ["oculi01_L", "oculi01_R"],
+				[
+					{"rotate": [[0.0, 1.0, 0.0], -45.0]},
+					{"rotate": [[0.0, 1.0, 0.0], 45.0]}
+				]
+			]
+		],
+		"male": [
+			["bone-group", "eyes-up",
+				[
+					"orbicularis03_L", "orbicularis04_L",
+					"eye_L", "eye_tracker.L",
+					 "orbicularis03_R", "orbicularis04_R",
+					 "eye_R", "eye_tracker.R"
+				],
+				[
+					{"translate": [0.0, 0.002, 0.004]},
+					{"translate": [0.0, 0.002, 0.004]},
+					{"translate": [0.0, 0.002, 0.004]},
+					{"translate": [0.0, 0.002, 0.004]},
+					{"translate": [0.0, 0.002, 0.004]},
+					{"translate": [0.0, 0.002, 0.004]},
+					{"translate": [0.0, 0.002, 0.004]},
+					{"translate": [0.0, 0.002, 0.004]}
+				]
+			]
+		],
+		"female": [
+			["bone-group", "eyes-up",
+				[
+					"orbicularis03_L", "orbicularis04_L",
+					"eye_L", 
+					 "orbicularis03_R", "orbicularis04_R",
+					 "eye_R"
+				],
+				[
+					{"translate": [0.0, 0.002, 0.004]},
+					{"translate": [0.0, 0.002, 0.004]},
+					{"translate": [0.0, 0.002, 0.004]},
+					{"translate": [0.0, 0.002, 0.004]},
+					{"translate": [0.0, 0.002, 0.004]},
+					{"translate": [0.0, 0.002, 0.004]}
+				]
+			]
+		]
+	},
+	"slots": [
+		"body",
+		"eyebrows",
+		"eyelashes",
+		"eyes",
+		"fingernails",
+		"hair",
+		"panties",
+		"tears",
+		"teeth",
+		"toenail",
+		"tongue",
+		"top",
+		"front_hair",
+		"back_hair"
+	]
+}
