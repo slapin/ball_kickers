@@ -20,6 +20,11 @@ var quests : = []
 var team_train_count : = 0
 # warning-ignore:unused_class_variable
 var arrow: Spatial
+# warning-ignore:unused_class_variable
+var next_scene: String
+var player_visual = {
+	"gender": "male"
+}
 
 func room_event(ev: String):
 	if current_room:

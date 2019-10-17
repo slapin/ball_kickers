@@ -70,7 +70,7 @@ static func pad_morphs(morphs: Dictionary, nshapes: Dictionary, min_point: Vecto
 							var d = morphs[mesh][m][t][v].shape[s][u]
 							morphs[mesh][m][t][v].shape[s][u] = (d - min_point[u]) / cd
 							var ew = morphs[mesh][m][t][v].shape[s][u] * cd + min_point[u]
-							assert abs(ew - d) < 0.001
+							assert(abs(ew - d) < 0.001)
 							morphs[mesh][m][t][v].normal[s][u] = (morphs[mesh][m][t][v].normal[s][u] - min_normal[u]) / ncd
 static func fill_draw_data(morphs: Dictionary, draw_data: Dictionary, morph_names: Dictionary, nshapes: Dictionary, rects: Dictionary):
 	var offset : = 0
@@ -110,7 +110,7 @@ func load_data():
 	for e in json_data.files:
 		var load_path = "res://" + e
 		var item = load(load_path)
-		assert item
+		assert(item)
 		common.push_back(item)
 
 static func update_rects(arrays: Array, bshapes: Array) -> Dictionary:
@@ -220,7 +220,7 @@ static func _pad_morphs(morphs: Dictionary, nshapes: Dictionary, min_point: Vect
 							var d = morphs[mesh][m][t][v].shape[s][u]
 							morphs[mesh][m][t][v].shape[s][u] = (d - min_point[u]) / cd
 							var ew = morphs[mesh][m][t][v].shape[s][u] * cd + min_point[u]
-							assert abs(ew - d) < 0.001
+							assert(abs(ew - d) < 0.001)
 							morphs[mesh][m][t][v].normal[s][u] = (morphs[mesh][m][t][v].normal[s][u] - min_normal[u]) / ncd
 #func build_queue():
 #	var scene_data : = {}
@@ -272,7 +272,7 @@ func _ready():
 			var morph_list = get_shape_names(mesh)
 			helper_shapes += morph_list
 		for e in base_shapes:
-			assert e in helper_shapes
+			assert(e in helper_shapes)
 
 	for mesh_no in range(common.size()):
 #		var skipped : = 0
@@ -301,7 +301,7 @@ func _ready():
 			var ch: Node = common[mesh_no].instance()
 #			var mi: MeshInstance = find_mesh_name(ch, "base")
 			var mi_helper: MeshInstance = find_mesh_name(ch, helper_name)
-			assert mi_helper != null
+			assert(mi_helper != null)
 			var mesh: ArrayMesh = mi_helper.mesh
 #			var mesh_skirt: ArrayMesh = mi_skirt.mesh
 			morphs_helper[mesh_no] = {}

@@ -35,14 +35,14 @@ func add_player(team: int, pl: Dictionary):
 		_teams[team] = [pl]
 	else:
 		_teams[team].push_back(pl)
-	assert pl != null
+	assert(pl != null)
 	ch2team[pl.scene] = team
 func add_cheer(team: int, ch: Dictionary):
 	if !_cheers.has(team):
 		_cheers[team] = [ch]
 	else:
 		_cheers[team].push_back(ch)
-	assert ch != null
+	assert(ch != null)
 	ch2team[ch.scene] = team
 func add_cheer_game_location(team: int, loc: Vector3):
 	if !_cheer_locations.has(team):
@@ -95,18 +95,18 @@ func start_game():
 	_state = STATE_START
 	for t in _teams.keys():
 		for ch in _teams[t]:
-			assert ch != null
+			assert(ch != null)
 			print(ch)
-			assert ch.scene != null
+			assert(ch.scene != null)
 			print("start: ", _team_start[t])
 			ch.scene.walkto(_team_start[t] + Vector3(randf() * 2.0 - 1.0, 0.0, randf() * 2.0 - 1.0),  1.0 + ch.speed + randf() * ch.speed * 0.5)
 			start_timeout = 10.0
 	var loc = 0
 	for t in _cheers.keys():
 		for ch in _cheers[t]:
-			assert ch != null
+			assert(ch != null)
 			print(ch)
-			assert ch.scene != null
+			assert(ch.scene != null)
 			ch.scene.walkto(_cheer_locations[t][loc % _cheer_locations[t].size()], 1.0 + ch.speed + randf() * ch.speed * 0.5)
 			loc += 1
 	for t in _teams.keys():

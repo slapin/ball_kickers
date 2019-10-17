@@ -94,6 +94,7 @@ def main():
                         "use_exclude_ctrl_bone": False,
                         "use_export_animation": True,
                         "use_export_material": True,
+                        "material_mode": "SPATIAL",
                         "use_export_shape_key": True,
                         "use_stashed_action": True,
                         "use_beta_features": True,

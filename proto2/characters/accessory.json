@@ -1,0 +1,332 @@
+{
+	"female": {
+		"body": {
+			"body_default": {
+				"materials": [
+					{
+						"name": "Material",
+						"path": "res://characters/accessory/female/body/Material.tres"
+					}
+				],
+				"path": "res://characters/accessory/female/body/body_default.mesh"
+			}
+		},
+		"eyebrows": {
+			"eyebrows_default": {
+				"materials": [
+					{
+						"name": "Material",
+						"path": "res://characters/accessory/female/eyebrows/Material.tres"
+					}
+				],
+				"path": "res://characters/accessory/female/eyebrows/eyebrows_default.mesh"
+			}
+		},
+		"eyelashes": {
+			"eyelashes_default": {
+				"materials": [
+					{
+						"name": "Material",
+						"path": "res://characters/accessory/female/eyelashes/Material.tres"
+					}
+				],
+				"path": "res://characters/accessory/female/eyelashes/eyelashes_default.mesh"
+			}
+		},
+		"eyes": {
+			"eyes_default": {
+				"materials": [
+					{
+						"name": "Material",
+						"path": "res://characters/accessory/female/eyes/Material.tres"
+					}
+				],
+				"path": "res://characters/accessory/female/eyes/eyes_default.mesh"
+			}
+		},
+		"fingernails": {
+			"fingernails_default": {
+				"materials": [
+					{
+						"name": "Material",
+						"path": "res://characters/accessory/female/fingernails/Material.tres"
+					}
+				],
+				"path": "res://characters/accessory/female/fingernails/fingernails_default.mesh"
+			}
+		},
+		"hair": {
+			"back_hair1": {
+				"materials": [
+					{
+						"name": "haircard1",
+						"path": "res://characters/accessory/female/hair/haircard1.tres"
+					}
+				],
+				"path": "res://characters/accessory/female/hair/back_hair1.mesh"
+			},
+			"back_hair2": {
+				"materials": [
+					{
+						"name": "haircard1",
+						"path": "res://characters/accessory/female/hair/haircard1.tres"
+					}
+				],
+				"path": "res://characters/accessory/female/hair/back_hair2.mesh"
+			},
+			"back_hair3": {
+				"materials": [
+					{
+						"name": "haircard1",
+						"path": "res://characters/accessory/female/hair/haircard1.tres"
+					}
+				],
+				"path": "res://characters/accessory/female/hair/back_hair3.mesh"
+			},
+			"front_hair1": {
+				"materials": [
+					{
+						"name": "haircard1",
+						"path": "res://characters/accessory/female/hair/haircard1.tres"
+					}
+				],
+				"path": "res://characters/accessory/female/hair/front_hair1.mesh"
+			},
+			"front_hair2": {
+				"materials": [
+					{
+						"name": "haircard1",
+						"path": "res://characters/accessory/female/hair/haircard1.tres"
+					}
+				],
+				"path": "res://characters/accessory/female/hair/front_hair2.mesh"
+			},
+			"front_hair3": {
+				"materials": [
+					{
+						"name": "haircard1",
+						"path": "res://characters/accessory/female/hair/haircard1.tres"
+					}
+				],
+				"path": "res://characters/accessory/female/hair/front_hair3.mesh"
+			},
+			"front_hair4": {
+				"materials": [
+					{
+						"name": "haircard1",
+						"path": "res://characters/accessory/female/hair/haircard1.tres"
+					}
+				],
+				"path": "res://characters/accessory/female/hair/front_hair4.mesh"
+			},
+			"hair_default": {
+				"materials": [
+					{
+						"name": "Material",
+						"path": "res://characters/accessory/female/hair/Material.tres"
+					}
+				],
+				"path": "res://characters/accessory/female/hair/hair_default.mesh"
+			}
+		},
+		"panties": {
+			"panties_default": {
+				"materials": [
+					{
+						"name": "Material",
+						"path": "res://characters/accessory/female/panties/Material.tres"
+					}
+				],
+				"path": "res://characters/accessory/female/panties/panties_default.mesh"
+			}
+		},
+		"tears": {
+			"tears_default": {
+				"materials": [
+					{
+						"name": "Material",
+						"path": "res://characters/accessory/female/tears/Material.tres"
+					}
+				],
+				"path": "res://characters/accessory/female/tears/tears_default.mesh"
+			}
+		},
+		"teeth": {
+			"teeth_default": {
+				"materials": [
+					{
+						"name": "Material",
+						"path": "res://characters/accessory/female/teeth/Material.tres"
+					}
+				],
+				"path": "res://characters/accessory/female/teeth/teeth_default.mesh"
+			}
+		},
+		"toenail": {
+			"toenail_default": {
+				"materials": [
+					{
+						"name": "Material",
+						"path": "res://characters/accessory/female/toenail/Material.tres"
+					}
+				],
+				"path": "res://characters/accessory/female/toenail/toenail_default.mesh"
+			}
+		},
+		"tongue": {
+			"tongue_default": {
+				"materials": [
+					{
+						"name": "Material",
+						"path": "res://characters/accessory/female/tongue/Material.tres"
+					}
+				],
+				"path": "res://characters/accessory/female/tongue/tongue_default.mesh"
+			}
+		},
+		"top": {
+			"top_default": {
+				"materials": [
+					{
+						"name": "Material",
+						"path": "res://characters/accessory/female/top/Material.tres"
+					}
+				],
+				"path": "res://characters/accessory/female/top/top_default.mesh"
+			}
+		}
+	},
+	"male": {
+		"body": {
+			"body_default": {
+				"materials": [
+					{
+						"name": "Material",
+						"path": "res://characters/accessory/male/body/Material.tres"
+					}
+				],
+				"path": "res://characters/accessory/male/body/body_default.mesh"
+			}
+		},
+		"eyebrows": {
+			"eyebrows_default": {
+				"materials": [
+					{
+						"name": "Material",
+						"path": "res://characters/accessory/male/eyebrows/Material.tres"
+					}
+				],
+				"path": "res://characters/accessory/male/eyebrows/eyebrows_default.mesh"
+			}
+		},
+		"eyelashes": {
+			"eyelashes_default": {
+				"materials": [
+					{
+						"name": "Material",
+						"path": "res://characters/accessory/male/eyelashes/Material.tres"
+					}
+				],
+				"path": "res://characters/accessory/male/eyelashes/eyelashes_default.mesh"
+			}
+		},
+		"eyes": {
+			"eyes_default": {
+				"materials": [
+					{
+						"name": "Material",
+						"path": "res://characters/accessory/male/eyes/Material.tres"
+					}
+				],
+				"path": "res://characters/accessory/male/eyes/eyes_default.mesh"
+			}
+		},
+		"hair": {
+			"back_hair1": {
+				"materials": [
+					{
+						"name": "haircard1",
+						"path": "res://characters/accessory/male/hair/haircard1.tres"
+					}
+				],
+				"path": "res://characters/accessory/male/hair/back_hair1.mesh"
+			},
+			"back_hair2": {
+				"materials": [
+					{
+						"name": "haircard1",
+						"path": "res://characters/accessory/male/hair/haircard1.tres"
+					}
+				],
+				"path": "res://characters/accessory/male/hair/back_hair2.mesh"
+			},
+			"back_hair3": {
+				"materials": [
+					{
+						"name": "haircard1",
+						"path": "res://characters/accessory/male/hair/haircard1.tres"
+					}
+				],
+				"path": "res://characters/accessory/male/hair/back_hair3.mesh"
+			},
+			"front_hair1": {
+				"materials": [
+					{
+						"name": "haircard1",
+						"path": "res://characters/accessory/male/hair/haircard1.tres"
+					}
+				],
+				"path": "res://characters/accessory/male/hair/front_hair1.mesh"
+			},
+			"front_hair2": {
+				"materials": [
+					{
+						"name": "haircard1",
+						"path": "res://characters/accessory/male/hair/haircard1.tres"
+					}
+				],
+				"path": "res://characters/accessory/male/hair/front_hair2.mesh"
+			},
+			"front_hair3": {
+				"materials": [
+					{
+						"name": "haircard1",
+						"path": "res://characters/accessory/male/hair/haircard1.tres"
+					}
+				],
+				"path": "res://characters/accessory/male/hair/front_hair3.mesh"
+			},
+			"hair_default": {
+				"materials": [
+					{
+						"name": "Material",
+						"path": "res://characters/accessory/male/hair/Material.tres"
+					}
+				],
+				"path": "res://characters/accessory/male/hair/hair_default.mesh"
+			}
+		},
+		"teeth": {
+			"teeth_default": {
+				"materials": [
+					{
+						"name": "Material",
+						"path": "res://characters/accessory/male/teeth/Material.tres"
+					}
+				],
+				"path": "res://characters/accessory/male/teeth/teeth_default.mesh"
+			}
+		},
+		"tongue": {
+			"tongue_default": {
+				"materials": [
+					{
+						"name": "Material",
+						"path": "res://characters/accessory/male/tongue/Material.tres"
+					}
+				],
+				"path": "res://characters/accessory/male/tongue/tongue_default.mesh"
+			}
+		}
+	}
+}

@@ -101,10 +101,10 @@ func _unhandled_input(event):
 		if event.button_mask & BUTTON_MASK_LEFT:
 			click2d = event.position
 			click2d_update = true
-			print("click!")
+#			print("click!")
 func _physics_process(delta):
 	if click2d_update:
-		print("click! 2")
+#		print("click! 2")
 		if camera:
 			var world : = camera.get_world()
 			var space := world.direct_space_state
@@ -115,7 +115,7 @@ func _physics_process(delta):
 			if result.has("position"):
 				click3d = result.position
 				click3d_update = true
-				print("click! 3")
+#				print("click! 3")
 				emit_signal("user_click", click3d)
 			click2d_update = false
 		

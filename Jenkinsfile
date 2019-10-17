@@ -23,7 +23,8 @@ node('docker && ubuntu-16.04') {
 		if (params.DOWNLOAD_TEMPLATES) {
 			sh '''#!/bin/sh
 				rm -f godot-templates.tar.gz
-				wget -c https://github.com/slapin/godot-templates-build/releases/download/2019_31_0802_1959/godot-templates.tar.gz
+				curl -s https://api.github.com/repos/slapin/godot-templates-build/releases/latest|grep browser_download_url|cut -d : -f2-|cut -d '"' -f 2|wget -i -
+#				wget -c https://github.com/slapin/godot-templates-build/releases/download/2019_31_0802_1959/godot-templates.tar.gz
 			'''
 		}
 		sh '''#!/bin/sh
@@ -97,10 +98,16 @@ node('docker && ubuntu-16.04') {
 			ls -l
 		'''
 	}
+	stage("artifacts") {
+		archiveArtifacts artifacts: "proto2-html5.zip", onlyIfSuccessful: true
+		archiveArtifacts artifacts: "BallKickers-windows.zip", onlyIfSuccessful: true
+		archiveArtifacts artifacts: "BallKickers-linux.zip", onlyIfSuccessful: true
+	}
 	stage("itch.io") {
 		withCredentials([string(credentialsId: 'itchio_token', variable: 'itchio_token')]) {
 			withEnv(["BUTLER_API_KEY=$itchio_token"]) {
 				sh '''#!/bin/sh
+					exit 0
 					export PATH=$PATH:$(pwd)/butler
 					butler push proto2-html5.zip slapin/ball-kickers:html
 					H=$?

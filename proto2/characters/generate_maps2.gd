@@ -9,27 +9,8 @@ var dnatool: DNATool
 #const TEX_SIZE: int = 512
 
 var maps = {}
-var vert_indices = {}
-
 onready var _characters = [load("res://characters/female_2018.escn"), load("res://characters/male_2018.escn")]
 
-func find_same_verts():
-	for chdata in range(_characters.size()):
-		var ch_scene = _characters[chdata].instance()
-		var bmesh = get_mesh(ch_scene, "body")
-		if !vert_indices.has(chdata):
-			vert_indices[chdata] = {}
-		for surface in range(bmesh.get_surface_count()):
-			var arrays: Array = bmesh.surface_get_arrays(surface).duplicate(true)
-			for index1 in range(arrays[ArrayMesh.ARRAY_VERTEX].size()):
-				var v1: Vector3 = arrays[ArrayMesh.ARRAY_VERTEX][index1]
-				var ok = false
-				for rk in vert_indices[chdata].keys():
-					if (v1 - rk).length() < 0.001:
-						ok = true
-						vert_indices[chdata][rk].push_back(index1)
-				if !ok:
-					vert_indices[chdata][v1] = [index1]
 
 func load_data():
 	var fd = File.new()
@@ -41,7 +22,7 @@ func load_data():
 	for e in json_data.files:
 		var load_path = "res://" + e
 		var item = load(load_path)
-		assert item
+		assert(item)
 		common.push_back(item)
 
 func get_mesh(base: Node, mesh_name: String) -> ArrayMesh:
@@ -50,7 +31,7 @@ func get_mesh(base: Node, mesh_name: String) -> ArrayMesh:
 	while queue.size() > 0:
 		var item = queue[0]
 		queue.pop_front()
-		if item is MeshInstance && item.name == mesh_name:
+		if item is MeshInstance && item.name == mesh_name && item.mesh:
 			mesh = item.mesh
 			break
 		for c in item.get_children():
@@ -62,9 +43,11 @@ func compress_points(v: PoolVector3Array, vmin: Vector3, vmax: Vector3) -> PoolV
 	var ret: PoolVector3Array = PoolVector3Array(v)
 	for e in range(v.size()):
 		for h in range(3):
-			assert cd[h] > 0.0
+			assert(cd[h] > 0.0)
 			ret[e][h] = (v[e][h] - vmin[h]) / cd[h]
-			assert ret[e][h] <= 1.0 && ret[e][h] >= 0.0
+			if !(ret[e][h] <= 1.0 && ret[e][h] >= 0.0):
+				print("failure: ", ret[e][h])
+			assert(ret[e][h] <= 1.0 && ret[e][h] >= 0.0)
 	return ret
 
 enum {STATE_DRAW, STATE_CHECK, STATE_FINISH, STATE_IDLE}
@@ -76,7 +59,7 @@ func create_queue(diffmap: Dictionary):
 		var mesh_name:String = k
 		var prefix = ""
 		if mesh_name.ends_with("_helper"):
-			prefix = mesh_name.replace("_helper", "_")
+			prefix = mesh_name.replace("_helper", ":")
 		for map_name in diffmap[k]:
 			var map_key = prefix + map_name
 			var data = {}
@@ -98,20 +81,39 @@ func create_queue(diffmap: Dictionary):
 			draw_queue.push_back(data)
 
 var uv_to_uv2: Dictionary
+func build_gender_maps(diffmap: Dictionary):
+	print("building gender maps")
+	var bobj = common[0].instance()
+	var bmesh = get_mesh(bobj, "base")
+	if !diffmap.has("base"):
+		diffmap.base = {}
+	var names = ["female", "male"]
+	for ch in range(_characters.size()):
+		print("building gender maps for: ", names[ch])
+		var obj = _characters[ch].instance()
+		var mesh = get_mesh(obj, "body")
+		assert(mesh)
+		var map_name = names[ch]
+		diffmap["base"][map_name] = dnatool.create_common2gender(bmesh, mesh)
 func _ready():
+	var start_time = OS.get_unix_time()
 	dnatool = DNATool.new()
 	load_data()
 	var base_mesh = "base"
 	var helper_meshes = ["robe_helper", "tights_helper", "skirt_helper"]
 	var diffmap = {}
-	for c in common:
-		for mesh_name in [base_mesh] + helper_meshes:
-			var obj = c.instance()
-			var mesh = get_mesh(obj, mesh_name)
-			dnatool.find_min_max(mesh)
-	var cd = dnatool.max_point - dnatool.min_point
-	var ncd = dnatool.max_normal - dnatool.min_normal
-	assert cd.x > 0.0 && cd.y > 0.0 && cd.z > 0.0
+#	for c in common:
+#		for mesh_name in [base_mesh] + helper_meshes:
+#			var obj = c.instance()
+#			var mesh = get_mesh(obj, mesh_name)
+#			assert mesh
+#			dnatool.find_min_max(mesh)
+#	for c in range(_characters.size()):
+#		var obj = _characters[c].instance()
+#		var mesh = get_mesh(obj, "body")
+#		assert mesh
+#		dnatool.find_min_max(mesh)
+	build_gender_maps(diffmap)
 	for c in common:
 		var obj = c.instance()
 		if !diffmap.has(base_mesh):
@@ -128,6 +130,12 @@ func _ready():
 			dnatool.build_triangles(helper_mesh, diffmap[mesh_name])
 			print("scene: ", c, "mesh: ", mesh_name, " done")
 		print("scene: ", c, " done")
+	for e in diffmap.keys():
+		for k in diffmap[e].keys():
+			dnatool.find_min_max_dict(diffmap[e][k])
+	var cd = dnatool.max_point - dnatool.min_point
+	var ncd = dnatool.max_normal - dnatool.min_normal
+	assert(cd.x > 0.0 && cd.y > 0.0 && cd.z > 0.0)
 	print("min: point: ", dnatool.min_point, " normal: ", dnatool.min_normal)
 	print("max: point: ", dnatool.max_point, " normal: ", dnatool.max_normal)
 	print("cd: ", cd, " ncd: ", ncd)
@@ -154,6 +162,8 @@ func _ready():
 	total_count = draw_queue.size()
 	$gen_maps/ProgressBar.value = 0.0
 	connect("draw_finished", self, "draw_finished")
+	var end_time = OS.get_unix_time()
+	print("preparation stage took ", end_time - start_time, " seconds")
 
 var total_count : = 0
 
@@ -250,7 +260,7 @@ func _process(delta):
 			_state = STATE_IDLE
 		STATE_FINISH:
 			print("generating same vert indices...")
-			find_same_verts()
+			dnatool.find_same_verts(_characters)
 			var fd = File.new()
 			fd.open("res://characters/common/config.bin", File.WRITE)
 			fd.store_var(dnatool.min_point)
@@ -258,7 +268,7 @@ func _process(delta):
 			fd.store_var(dnatool.min_normal)
 			fd.store_var(dnatool.max_normal)
 			fd.store_var(maps)
-			fd.store_var(vert_indices)
+			fd.store_var(dnatool.vert_indices)
 			fd.store_var(uv_to_uv2)
 			fd.close()
 			if save_pngs:

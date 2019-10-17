@@ -151,7 +151,8 @@ func _process(delta):
 				if abs($car1/trunk_rotate.rotation.x - PI/6.0) < 0.1:
 					_state = STATE_FINISH
 		STATE_FINISH:
-			var sc = load("res://ui/act1_start.tscn")
+			var sc = load("res://characters/customization/customize_player.tscn")
+			world.next_scene = "res://ui/act1_start.tscn"
 			get_tree().change_scene_to(sc)
 var grass = [
 	load("res://elements/forest/grass_1.mesh"),

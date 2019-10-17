@@ -27,14 +27,14 @@ func add_player(team: int, pl: Dictionary):
 		_teams[team] = [pl]
 	else:
 		_teams[team].push_back(pl)
-	assert pl != null
+	assert(pl != null)
 	ch2team[pl.scene] = team
 func add_cheer(team: int, ch: Dictionary):
 	if !_cheers.has(team):
 		_cheers[team] = [ch]
 	else:
 		_cheers[team].push_back(ch)
-	assert ch != null
+	assert(ch != null)
 	ch2team[ch.scene] = team
 func add_cheer_game_location(team: int, loc: Vector2):
 	if !_cheer_locations.has(team):
@@ -130,7 +130,7 @@ func catch_ball(pl):
 	_ball_carrier = pl
 var max_imp = 500.0
 func drop_ball(pl):
-	assert _main != null
+	assert(_main != null)
 	_ball_instance.kinematic = false
 	_ball_instance.new_parent = _main
 	_ball_instance.update = true
@@ -226,7 +226,7 @@ func _process(delta):
 		STATE_RUNNING:
 			for c in _teams.keys():
 				for pl in _teams[c]:
-					assert pl.scene != null
+					assert(pl.scene != null)
 					if !_ball_carrier || (pl != _ball_carrier && _ball_team != c):
 						var velocity = striker(pl, delta)
 						velocity = pl.scene.velocity.linear_interpolate(velocity, 0.3 * delta)

@@ -7,12 +7,13 @@ extends Spatial
 # Called when the node enters the scene tree for the first time.
 var frame_tf: Transform = Transform()
 var ball_game : BallGameAI3D
+var master
 
 func master_control(pos):
 	print("walkto: ", pos)
 	var n = lerp(world.master_node.get_walk_speed(), 3.8, 0.1)
 	world.master_node.set_walk_speed(n)
-	$master.walkto(pos)
+	master.walkto(pos)
 
 func update_quests():
 	$info/task/task.text = "No active tasks"
@@ -56,11 +57,11 @@ func start_training(ball):
 			ball_game.set_team_gate(1, k)
 	var t_start = randi() % 2
 	for ch in world.cheer_team.keys():
-		assert world.cheer_team[ch] != null
+		assert(world.cheer_team[ch] != null)
 		ball_game.add_cheer(t_start, world.cheer_team[ch])
 		t_start ^= 1
 	for ch in world.team.keys():
-		assert world.team[ch] != null
+		assert(world.team[ch] != null)
 		ball_game.add_player(t_start, world.team[ch])
 		t_start ^= 1
 	ball_game.set_ball(ball)
@@ -88,7 +89,13 @@ func update_training(score):
 	v = PoolStringArray(sdata).join(":")
 	$score/v/l.text = v
 	$score/v/footer.text = "%.1f seconds left" % (ball_game.max_training_time - ball_game.training_time)
-	
+
+func spawn_character(cd, xform, k):
+	var char_sc = characters.spawn_character(cd.gender, xform)
+	cd.scene = char_sc
+	cd.id = k
+	char_sc.set_meta("data", cd)
+	characters.update()
 
 func _ready():
 	notifications.set_main(self)
@@ -103,37 +110,26 @@ func _ready():
 			item.collision_mask = 1 | 512
 		for c in item.get_children():
 			queue.push_back(c)
-	$master.add_to_group("master")
-	controls.master_node = $master
-	world.master_node = $master
+	var master_xform = $master.global_transform
+	$master.queue_free()
+	master = characters.spawn_character(1, master_xform)
+	master.add_to_group("master")
+	controls.master_node = master
+	world.master_node = master
+#	$master.add_to_group("master")
+#	controls.master_node = $master
+#	world.master_node = $master
 	world.init_data()
 	world.nav = $nav
 	controls.camera = $Camera
 	controls.connect("user_click", self, "master_control")
 	for k in world.line.keys():
 		var cd = world.line[k]
-		if cd.gender == 0:
-			var char_sc = characters.characters[0].instance()
-			cd.scene = char_sc
-			get_tree().get_root().add_child(char_sc)
-			var nav: Navigation2D = get_node("nav")
-			var p = nav.get_closest_point(get_node("line_spawn").global_transform.origin + Vector3(randf() * 20.0 - 10.0, 0.0, randf() * 20 - 10.0))
-			char_sc.translation = p
-			cd.id = k
-			char_sc.set_meta("data", cd)
-#			world.team[newkey] = cd
-#			world.line.erase(k)
-		else:
-			var char_sc = characters.characters[1].instance()
-			cd.scene = char_sc
-			get_tree().get_root().add_child(char_sc)
-			var nav: Navigation2D = get_node("nav")
-			var p = nav.get_closest_point(get_node("line_spawn").global_transform.origin + Vector3(randf() * 20.0 - 10.0, 0.0, randf() * 20 - 10.0))
-			char_sc.translation = p
-			cd.id = k
-			char_sc.set_meta("data", cd)
-#			world.team[newkey] = cd
-#		cd.scene.set_meta("data", cd)
+		var char_xform = Transform()
+		var nav: Navigation2D = get_node("nav")
+		var p = nav.get_closest_point(get_node("line_spawn").global_transform.origin + Vector3(randf() * 20.0 - 10.0, 0.0, randf() * 20 - 10.0))
+		char_xform.origin = p
+		call_deferred("spawn_character", cd, char_xform, k)
 	var tut_quest = Quest.new("Tutorial", "This quest shortly introduces to a game")
 	tut_quest.connect("started", self, "start_quest")
 	tut_quest.connect("complete", self, "complete_quest")
@@ -167,7 +163,7 @@ func _ready():
 	$score.hide()
 
 func _process(delta):
-	var pos = $master.global_transform.origin
+	var pos = master.global_transform.origin
 	pos.y = $Camera.global_transform.origin.y
 	$Camera.global_transform.origin = $Camera.global_transform.origin.linear_interpolate(pos, 0.8 * delta)
 	if $score.visible && ball_game != null:

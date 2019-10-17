@@ -62,18 +62,18 @@ func toggle_clothes(mi: MeshInstance, cloth_name: String):
 	mi.visible = !mi.visible
 
 func find_mesh(base: Node, mesh_name: String) -> MeshInstance:
-	assert base
+	assert(base)
 	var queue = [base]
 	var mi: MeshInstance
 	while queue.size() > 0:
 		var item = queue[0]
-		assert item
+		assert(item)
 		queue.pop_front()
 		if item is MeshInstance && item.name == mesh_name:
 			mi = item
 			break
 		for c in item.get_children():
-			assert c
+			assert(c)
 			queue.push_back(c)
 	return mi
 #func modify_mesh(orig_mesh: ArrayMesh, mi: MeshInstance, v_indices: Dictionary):
@@ -192,7 +192,7 @@ func prepare_character(x: int) -> void:
 		var cloth_mi : = find_mesh(ch, cloth)
 		if !cloth_mi:
 			continue
-		cloth_mi.mesh = dna.add_cloth_mesh(cloth, clothes[cloth].helper, cloth_mi.mesh)
+		dna.add_cloth_mesh(cloth, clothes[cloth].helper, cloth_mi.mesh)
 		cloth_mis[cloth] = cloth_mi
 #		prepare_cloth(body_mi, cloth_mi)
 #		cloth_meshes.push_back(cloth_mi.mesh)
@@ -266,7 +266,7 @@ func _process(delta):
 			state = 1
 		1:
 #			$Panel.hide()
-			assert body_mi.mesh
+			assert(body_mi.mesh)
 			build_contols()
 			$s/VBoxContainer/button_female.connect("pressed", self, "button_female")
 			$s/VBoxContainer/button_male.connect("pressed", self, "button_male")

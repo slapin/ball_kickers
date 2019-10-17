@@ -511,7 +511,7 @@ func convert_vertices():
 	for e in range(vertices.size()):
 		vertices[e]._neighbors = []
 		for h in vertices[e].neighbors:
-			assert h
+			assert(h)
 #			print(pos2vertex[h.pos])
 			vertices[e]._neighbors.push_back(pos2vertex[h.pos]._index)
 func has_neighbor(v, n):
@@ -581,7 +581,7 @@ func remove_neighbor(v, n):
 #		var triangle = [e1, e2, e3]
 #		triangles.push_back(triangle)
 func sort_edges(edge_data: PoolIntArray) -> PoolIntArray:
-	assert edge_data.size() > 0
+	assert(edge_data.size() > 0)
 	var inb = Array(edge_data)
 	var cur = -1
 	var cur_p = -1
@@ -613,7 +613,7 @@ func sort_edges(edge_data: PoolIntArray) -> PoolIntArray:
 #	for p in edge_data:
 #		print(p, ": ", edges[p].p1, " - ", edges[p].p2)
 #	print(ret.size(), " ", edge_data.size(), " ", edge_data, " -> ", ret)
-	assert ret.size() > 0 && ret.size() == edge_data.size()
+	assert(ret.size() > 0 && ret.size() == edge_data.size())
 	return ret
 func edges2points(edge_data):
 	var ret = {}
@@ -631,7 +631,7 @@ func edges2points(edge_data):
 			"road": edges[e].road
 		})
 		idx += 1
-	assert ret.points.size() > 0 && ret.points.size() == edge_data.size()
+	assert(ret.points.size() > 0 && ret.points.size() == edge_data.size())
 	return ret
 #func build_polygons():
 #	print("triangulation: ", triangulation.size())
@@ -1060,8 +1060,8 @@ class VertexData:
 		data = v
 		_road_width = road_width
 		_sidewalk_width = sidewalk_width
-		assert v.has("_index")
-		assert v.has("_neighbors")
+		assert(v.has("_index"))
+		assert(v.has("_neighbors"))
 	func angle_sort_helper(a, b):
 		var v1: Vector2 = a[1] - a[0]
 		var v2: Vector2 = b[1] - b[0]
@@ -1069,7 +1069,7 @@ class VertexData:
 			return true
 		return false
 	func get_wedges(vertices: Array) -> Array:
-		assert data
+		assert(data)
 		var edges = []
 		for id in data._neighbors:
 			edges.push_back([data.pos, vertices[id].pos, data._index, id])
