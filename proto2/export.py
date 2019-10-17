@@ -128,6 +128,8 @@ def main():
                             config[k] = set(v)
                         else:
                             config[k] = v
+                if config.has_key("skip") and config["skip"]:
+                    continue
                 # export blend file
                 print("---------")
                 print("Exporting {}".format(os.path.abspath(item_abspath)))
