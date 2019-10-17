@@ -134,5 +134,6 @@ func _ready():
 #	var max_normal = triset.get_max_normal()
 #	print([minp, maxp, min_normal, max_normal])
 	print("complete")
+	get_tree().quit()
 #	print("deflate size: ", deflate_size, " rle size: ", rle_size)
 
