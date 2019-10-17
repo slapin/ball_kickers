@@ -41,7 +41,29 @@ node('docker && ubuntu-16.04') {
 			ls -l
 			ls -l godot-templates
 			./godot-templates/godot_server.x11.tools.64  --help || true
-			
+			wget -c https://download.blender.org/release/Blender2.80/blender-2.80-linux-glibc217-x86_64.tar.bz2
+			git clone git://github.com/godotengine/godot-blender-exporter
+			tar xf blender-2.80-linux-glibc217-x86_64.tar.bz2
+			cd blender-2.80-linux-glibc217-x86_64/2.80/scripts/addons
+			ln -s ../../../../godot-blender-exporter/io_scene_godot .
+			cd ../../../..
+			./blender-2.80-linux-glibc217-x86_64/blender -b -P enable_addons.py
+		'''
+	}
+	stage("blender-export") {
+		sh '''#!/bin/sh
+			cd proto2
+			rm -f characters/accessory.json
+			rm -Rf characters/accessory
+			../blender-2.80-linux-glibc217-x86_64/blender -b -P export.py
+		'''
+	}
+	stage("build-blendmaps") {
+		sh '''#!/bin/sh
+			base=$(pwd)
+			cd proto2
+			ls -l
+			${base}/godot-templates/godot_server.x11.tools.64 tests/test-triangles.tscn
 		'''
 	}
 	stage("export-linux") {
