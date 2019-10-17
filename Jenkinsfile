@@ -33,7 +33,7 @@ node('docker && ubuntu-16.04') {
 			echo before
 			ls -l
 			rm -Rf proto2-html5.zip BallKickers-windows.zip BallKickers-linux.zip \
-				BallKickers proto1-html proto1-html5 proto1-html5.js \
+				BallKickers BallKickers.zip proto1-html proto1-html5 proto1-html5.js \
 				proto1-html5.pck proto1-html5.png proto1-html5.wasm \
 				proto1-html5.zip proto2-html proto2-linux proto2-windows.exe
 			echo after
