@@ -72,7 +72,8 @@ node('docker && ubuntu-16.04') {
 			base=$(pwd)
 			cd proto2
 			ls -l
-			${base}/godot-templates/godot_server.x11.tools.64 --export "linux" ${base}/proto2-linux
+			${base}/godot-templates/godot_server.x11.tools.64 \
+				--export "linux" ${base}/proto2-linux || exit 0
 			cd ..
 			ls -l
 			rm -Rf BallKickers
@@ -88,7 +89,8 @@ node('docker && ubuntu-16.04') {
 			base=$(pwd)
 			cd proto2
 			ls -l
-			${base}/godot-templates/godot_server.x11.tools.64 --export "windows" ${base}/proto2-windows.exe
+			${base}/godot-templates/godot_server.x11.tools.64 \
+				--export "windows" ${base}/proto2-windows.exe || exit 0
 			cd ..
 			ls -l
 			rm -Rf BallKickers
@@ -109,7 +111,8 @@ node('docker && ubuntu-16.04') {
 			cp project.godot project.godot.backup
 			sed -e 's/GLES3/GLES2/g' -i project.godot
 			cat project.godot
-			${base}/godot-templates/godot_server.x11.tools.64 --export "HTML5" ${base}/proto2-html/index.html
+			${base}/godot-templates/godot_server.x11.tools.64 \
+				--export "HTML5" ${base}/proto2-html/index.html || exit 0
 			cp project.godot.backup project.godot
 			rm -f project.godot.backup
 
