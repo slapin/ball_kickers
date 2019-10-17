@@ -30,7 +30,11 @@ node('docker && ubuntu-16.04') {
 		sh '''#!/bin/sh
 			rm -f export-templates
 			rm -Rf godot-templates
+			echo before
+			ls -l
 			rm -f proto2-html5.zip BallKickers-windows.zip BallKickers-linux.zip
+			echo after
+			ls -l
 			tar xf godot-templates.tar.gz
 			ln -sf godot-templates export-templates
                         mkdir butler
