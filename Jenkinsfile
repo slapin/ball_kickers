@@ -55,7 +55,7 @@ node('docker && ubuntu-16.04') {
 			cd proto2
 			rm -f characters/accessory.json
 			rm -Rf characters/accessory
-			../blender-2.80-linux-glibc217-x86_64/blender -b -P export.py
+			../blender-2.80-linux-glibc217-x86_64/blender -b --debug-io -P export.py
 		'''
 	}
 	stage("build-blendmaps") {
