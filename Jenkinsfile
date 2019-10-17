@@ -73,7 +73,11 @@ node('docker && ubuntu-16.04') {
 		sh '''#!/bin/sh
 			base=$(pwd)
 			cd proto2
+			rm -f characters/accessory.json
+			rm -Rf characters/accessory
+			rm -Rf .import
 			ls -l
+			${base}/godot-templates/godot_server.x11.tools.64 -e tests/quit.tscn || true
 			${base}/godot-templates/godot_server.x11.tools.64 tests/test-triangles.tscn || true
 		'''
 	}
