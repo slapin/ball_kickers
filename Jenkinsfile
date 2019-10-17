@@ -32,12 +32,15 @@ node('docker && ubuntu-16.04') {
 			rm -Rf godot-templates
 			echo before
 			ls -l
-			rm -f proto2-html5.zip BallKickers-windows.zip BallKickers-linux.zip
+			rm -Rf proto2-html5.zip BallKickers-windows.zip BallKickers-linux.zip \
+				BallKickers proto1-html proto1-html5 proto1-html5.js \
+				proto1-html5.pck proto1-html5.png proto1-html5.wasm \
+				proto1-html5.zip proto2-html proto2-linux proto2-windows.exe
 			echo after
 			ls -l
 			tar xf godot-templates.tar.gz
 			ln -sf godot-templates export-templates
-                        mkdir butler
+                        mkdir -p butler
                         cd butler
                         curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
                         unzip butler.zip
@@ -84,6 +87,9 @@ node('docker && ubuntu-16.04') {
 			${base}/godot-templates/godot_server.x11.tools.64 \
 				--export "linux" ${base}/proto2-linux || exit 0
 			cd ..
+			if [ ! -f ${base}/proto2-linux ]; then
+				exit 1
+			fi
 			ls -l
 			rm -Rf BallKickers
 			mkdir BallKickers
