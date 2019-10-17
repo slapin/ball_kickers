@@ -29,6 +29,8 @@ node('docker && ubuntu-16.04') {
 		}
 		sh '''#!/bin/sh
 			rm -f export-templates
+			rm -Rf godot-templates
+			rm -f proto2-html5.zip BallKickers-windows.zip BallKickers-linux.zip
 			tar xf godot-templates.tar.gz
 			ln -sf godot-templates export-templates
                         mkdir butler
@@ -55,7 +57,9 @@ node('docker && ubuntu-16.04') {
 			cd proto2
 			rm -f characters/accessory.json
 			rm -Rf characters/accessory
+			rm -Rf .import
 			../blender-2.80-linux-glibc217-x86_64/blender -b --debug-io -P export.py
+			rm -Rf exports
 		'''
 	}
 	stage("build-blendmaps") {
@@ -70,6 +74,7 @@ node('docker && ubuntu-16.04') {
 		sh '''#!/bin/sh
 			set -e
 			base=$(pwd)
+			rm -f ${base}/BallKickers-linux.zip
 			cd proto2
 			ls -l
 			${base}/godot-templates/godot_server.x11.tools.64 \
@@ -87,6 +92,7 @@ node('docker && ubuntu-16.04') {
 		sh '''#!/bin/sh
 			set -e
 			base=$(pwd)
+			rm -f ${base}/BallKickers-windows.zip
 			cd proto2
 			ls -l
 			${base}/godot-templates/godot_server.x11.tools.64 \
@@ -104,6 +110,7 @@ node('docker && ubuntu-16.04') {
 		sh '''#!/bin/sh
 			set -e
 			base=$(pwd)
+			rm -f ${base}/proto2-html5.zip
 			rm -Rf proto2-html
 			mkdir proto2-html
 			cd proto2
