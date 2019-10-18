@@ -4,15 +4,16 @@ importer="texture"
 type="StreamTexture"
 path.s3tc="res://.import/eyebrow001.png-75967799652e46e81e461dd789fa0b05.s3tc.stex"
 path.etc2="res://.import/eyebrow001.png-75967799652e46e81e461dd789fa0b05.etc2.stex"
+path.etc="res://.import/eyebrow001.png-75967799652e46e81e461dd789fa0b05.etc.stex"
 metadata={
-"imported_formats": [ "s3tc", "etc2" ],
+"imported_formats": [ "s3tc", "etc2", "etc" ],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://textures/eyebrow001.png"
-dest_files=[ "res://.import/eyebrow001.png-75967799652e46e81e461dd789fa0b05.s3tc.stex", "res://.import/eyebrow001.png-75967799652e46e81e461dd789fa0b05.etc2.stex" ]
+dest_files=[ "res://.import/eyebrow001.png-75967799652e46e81e461dd789fa0b05.s3tc.stex", "res://.import/eyebrow001.png-75967799652e46e81e461dd789fa0b05.etc2.stex", "res://.import/eyebrow001.png-75967799652e46e81e461dd789fa0b05.etc.stex" ]
 
 [params]
 

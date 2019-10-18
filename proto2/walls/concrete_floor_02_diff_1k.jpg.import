@@ -4,15 +4,16 @@ importer="texture"
 type="StreamTexture"
 path.s3tc="res://.import/concrete_floor_02_diff_1k.jpg-01b0d14de34b948cddc1d322b847322f.s3tc.stex"
 path.etc2="res://.import/concrete_floor_02_diff_1k.jpg-01b0d14de34b948cddc1d322b847322f.etc2.stex"
+path.etc="res://.import/concrete_floor_02_diff_1k.jpg-01b0d14de34b948cddc1d322b847322f.etc.stex"
 metadata={
-"imported_formats": [ "s3tc", "etc2" ],
+"imported_formats": [ "s3tc", "etc2", "etc" ],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://walls/concrete_floor_02_diff_1k.jpg"
-dest_files=[ "res://.import/concrete_floor_02_diff_1k.jpg-01b0d14de34b948cddc1d322b847322f.s3tc.stex", "res://.import/concrete_floor_02_diff_1k.jpg-01b0d14de34b948cddc1d322b847322f.etc2.stex" ]
+dest_files=[ "res://.import/concrete_floor_02_diff_1k.jpg-01b0d14de34b948cddc1d322b847322f.s3tc.stex", "res://.import/concrete_floor_02_diff_1k.jpg-01b0d14de34b948cddc1d322b847322f.etc2.stex", "res://.import/concrete_floor_02_diff_1k.jpg-01b0d14de34b948cddc1d322b847322f.etc.stex" ]
 
 [params]
 

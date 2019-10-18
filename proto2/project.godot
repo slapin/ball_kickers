@@ -149,5 +149,6 @@ limits/message_queue/max_size_kb=2048
 
 quality/driver/fallback_to_gles2=true
 threads/thread_model=2
+vram_compression/import_etc=true
 threads/thread_model.web=1
 quality/driver/driver_name.web="GLES2"
