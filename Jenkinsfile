@@ -77,8 +77,8 @@ node('docker && ubuntu-16.04') {
 			rm -Rf characters/accessory
 			rm -Rf .import
 			ls -l
-			${base}/godot-templates/godot_server.x11.tools.64 -e tests/quit.tscn || true
-			${base}/godot-templates/godot_server.x11.tools.64 tests/test-triangles.tscn || true
+			${base}/godot-templates/godot_server.x11.tools.64 -e tests/quit.tscn
+			${base}/godot-templates/godot_server.x11.tools.64 tests/test-triangles.tscn
 		'''
 	}
 	stage("export-linux") {
@@ -89,7 +89,7 @@ node('docker && ubuntu-16.04') {
 			cd proto2
 			ls -l
 			${base}/godot-templates/godot_server.x11.tools.64 \
-				--export "linux" ${base}/proto2-linux || exit 0
+				--export "linux" ${base}/proto2-linux
 			cd ..
 			if [ ! -f ${base}/proto2-linux ]; then
 				exit 1
@@ -110,7 +110,7 @@ node('docker && ubuntu-16.04') {
 			cd proto2
 			ls -l
 			${base}/godot-templates/godot_server.x11.tools.64 \
-				--export "windows" ${base}/proto2-windows.exe || exit 0
+				--export "windows" ${base}/proto2-windows.exe
 			cd ..
 			ls -l
 			rm -Rf BallKickers
@@ -133,7 +133,7 @@ node('docker && ubuntu-16.04') {
 			sed -e 's/GLES3/GLES2/g' -i project.godot
 			cat project.godot
 			${base}/godot-templates/godot_server.x11.tools.64 \
-				--export "HTML5" ${base}/proto2-html/index.html || exit 0
+				--export "HTML5" ${base}/proto2-html/index.html
 			cp project.godot.backup project.godot
 			rm -f project.godot.backup
 
