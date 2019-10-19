@@ -22,24 +22,21 @@ node('docker && ubuntu-16.04') {
 	stage("download") {
 		if (params.DOWNLOAD_TEMPLATES) {
 			sh '''#!/bin/sh
+				rm -f export-templates
+				rm -Rf godot-templates
+				TAG=$(curl -s https://api.github.com/repos/slapin/godot-templates-build/releases/latest|grep tag_name|cut -d : -f2|cut -d '"' -f2)
 				rm -f godot-templates.tar.gz
-				curl -s https://api.github.com/repos/slapin/godot-templates-build/releases/latest|grep browser_download_url|cut -d : -f2-|cut -d '"' -f 2|wget -i -
-#				wget -c https://github.com/slapin/godot-templates-build/releases/download/2019_31_0802_1959/godot-templates.tar.gz
+				FILE_NAME=godot-templates-${TAG}.tar.gz
+				curl -s https://api.github.com/repos/slapin/godot-templates-build/releases/latest|grep browser_download_url|cut -d : -f2-|cut -d '"' -f 2|wget -c -O${FILE_NAME} -i -
+				tar xf ${FILE_NAME}
+				ln -sf godot-templates export-templates
 			'''
 		}
 		sh '''#!/bin/sh
-			rm -f export-templates
-			rm -Rf godot-templates
-			echo before
-			ls -l
 			rm -Rf proto2-html5.zip BallKickers-windows.zip BallKickers-linux.zip \
 				BallKickers BallKickers.zip proto1-html proto1-html5 proto1-html5.js \
 				proto1-html5.pck proto1-html5.png proto1-html5.wasm \
 				proto1-html5.zip proto2-html proto2-linux proto2-windows.exe
-			echo after
-			ls -l
-			tar xf godot-templates.tar.gz
-			ln -sf godot-templates export-templates
                         mkdir -p butler
                         cd butler
                         curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
