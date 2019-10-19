@@ -108,6 +108,11 @@ characters="*res://autoloads/characters.gd"
 notifications="*res://autoloads/notifications.gd"
 roadmap="*res://autoloads/roadmap.gd"
 
+[debug]
+
+settings/stdout/print_fps=true
+settings/stdout/verbose_stdout=true
+
 [input]
 
 move_west={
@@ -148,7 +153,6 @@ limits/message_queue/max_size_kb=2048
 [rendering]
 
 quality/driver/fallback_to_gles2=true
-threads/thread_model=2
 vram_compression/import_etc=true
 threads/thread_model.web=1
 quality/driver/driver_name.web="GLES2"

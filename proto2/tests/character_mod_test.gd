@@ -150,7 +150,7 @@ func _process(delta):
 			xform.origin.z = 5.0
 			xform.basis = xform.basis.rotated(Vector3(0, 1, 0), PI)
 			if randf() > 0.5:
-				c = characters.spawn_character(1, xform)
+				c = characters.spawn_character(0, xform)
 #				c = characters.characters[1].instance()
 #				add_child(c)
 #				c.translation.x = $Camera.translation.x + 3.0
@@ -199,7 +199,7 @@ func _process(delta):
 	var remove_ids = []
 	for ie in range(_characters.size()):
 		var e = _characters[ie]
-		if abs($Camera.translation.x + 3.0 - e.scene.translation.x) > 6.0:
+		if abs($Camera.translation.x + 3.0 - e.scene.translation.x) > 26.0:
 			characters.remove(e.scene)
 #			e.cha.remove_work_meshes(e.mesh_id)
 #			e.scene.queue_free()

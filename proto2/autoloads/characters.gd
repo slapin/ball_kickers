@@ -183,6 +183,7 @@ func set_modifier_value(ch: Node, mod_id, value):
 #	var cha = ch.get_meta("mod")
 #	cha.modify(ch)
 func update():
+	print("update")
 	CharacterInstanceList.update()
 
 func remove(ch):

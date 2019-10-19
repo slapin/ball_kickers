@@ -95,6 +95,8 @@ func spawn_character(cd, xform, k):
 	cd.scene = char_sc
 	cd.id = k
 	char_sc.set_meta("data", cd)
+func characters_done():
+	characters.update()
 	characters.update()
 
 func _ready():
@@ -112,7 +114,7 @@ func _ready():
 			queue.push_back(c)
 	var master_xform = $master.global_transform
 	$master.queue_free()
-	master = characters.spawn_character(1, master_xform)
+	master = characters.spawn_character(0, master_xform)
 	master.add_to_group("master")
 	controls.master_node = master
 	world.master_node = master
@@ -126,10 +128,11 @@ func _ready():
 	for k in world.line.keys():
 		var cd = world.line[k]
 		var char_xform = Transform()
-		var nav: Navigation2D = get_node("nav")
+		var nav: Navigation = get_node("nav")
 		var p = nav.get_closest_point(get_node("line_spawn").global_transform.origin + Vector3(randf() * 20.0 - 10.0, 0.0, randf() * 20 - 10.0))
 		char_xform.origin = p
 		call_deferred("spawn_character", cd, char_xform, k)
+	call_deferred("characters_done")
 	var tut_quest = Quest.new("Tutorial", "This quest shortly introduces to a game")
 	tut_quest.connect("started", self, "start_quest")
 	tut_quest.connect("complete", self, "complete_quest")

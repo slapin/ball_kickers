@@ -5,6 +5,7 @@ extends Spatial
 # var b = "text"
 
 # Called when the node enters the scene tree for the first time.
+var vehicle_x = 0.0
 func start():
 	print("Started")
 	var forest
@@ -108,6 +109,7 @@ func _ready():
 	$"car1/front-door-right".set_surface_material(0, car_mat)
 	$"car1/trunk_rotate/trunk_cover".set_surface_material(0, car_mat)
 	$"car1/floor".set_surface_material(0, car_bottom_mat)
+	vehicle_x = $car1.translation.x
 
 var narration = [
 	"It was never a good sign to go to forest in a car trunk...",
@@ -136,13 +138,13 @@ func _process(delta):
 			var trig: int = randi() % 2
 			if Input.is_action_just_pressed("move_east") && trig == 1:
 				if $progress.value < 100:
-					$progress.value += (2 + randi() % 4)
+					$progress.value += (4 + randi() % 4)
 			if Input.is_action_just_pressed("move_west") && trig == 0:
 				if $progress.value < 100:
-					$progress.value += (2 + randi() % 4)
+					$progress.value += (4 + randi() % 4)
 			if randf() > 0.9:
 				if $progress.value > 0:
-					$progress.value -= (1 + randi() % 2)
+					$progress.value -= (1 + randi() % 3)
 			if $progress.value >= 99:
 				_state = STATE_KICK_TRUNK
 		STATE_KICK_TRUNK:
@@ -236,3 +238,12 @@ func _physics_process(delta):
 			$car1.engine_force = (1.0 - delta * 0.2)
 			if car_speed < 10:
 				$car1.brake = 4000.0
+	if _state != STATE_KICK_TRUNK:
+		if $car1.translation.x < vehicle_x - 0.2:
+			$car1.steering = -0.03
+			$car1.engine_force = 0.0
+		elif $car1.translation.x > vehicle_x + 0.2:
+			$car1.steering = 0.03
+			$car1.engine_force = 0.0
+		else:
+			$car1.steering *= (1.0 - delta) * 0.2

@@ -77,8 +77,8 @@ script = ExtResource( 2 )
 [node name="male_g_2018" parent="male_2018" index="0"]
 bones/110/bound_children = [ NodePath("item_carry") ]
 
-[node name="item_carry" type="BoneAttachment" parent="male_2018/male_g_2018" index="9"]
-transform = Transform( 0.579234, -0.742538, -0.336341, 0.736249, 0.299448, 0.606851, -0.349893, -0.59914, 0.720144, 0.334017, 1.00794, -0.175007 )
+[node name="item_carry" type="BoneAttachment" parent="male_2018/male_g_2018" index="1"]
+transform = Transform( 0.57822, -0.742842, -0.337411, 0.736408, 0.297145, 0.607789, -0.351231, -0.599909, 0.71885, 0.334138, 1.00818, -0.174576 )
 bone_name = "wrist_R"
 
 [node name="ball_carry" type="Spatial" parent="male_2018/male_g_2018/item_carry"]
